@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>소리의 디지털 표현</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    canvas {
+      border: 2px solid #ccc;
+      display: block;
+      margin: 20px auto;
+    }
+
+    .controls {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .controls input[type=range] {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>소리의 디지털 표현 (샘플링 및 파형 시각화)</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>소리 샘플링이란?</h2>
+      <p>소리는 연속적인 아날로그 파형이지만, 컴퓨터는 이를 일정 간격으로 나눠서 <strong>샘플링</strong>하여 디지털로 저장합니다. 샘플링 주기가 짧을수록 더 원본에 가까운 소리를 저장할 수 있습니다.</p>
+    </section>
+
+    <section class="controls">
+      <label for="frequency">샘플링 주기 (높을수록 더 자세한 파형):</label><br />
+      <input type="range" id="frequency" min="10" max="100" value="50" />
+    </section>
+
+    <canvas id="soundWaveCanvas" width="600" height="200"></canvas>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('soundWaveCanvas');
+    const ctx = canvas.getContext('2d');
+    const frequencyInput = document.getElementById('frequency');
+
+    function drawWave(samples = 50) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+
+      for (let i = 0; i <= samples; i++) {
+        const x = (i / samples) * canvas.width;
+        const t = i / samples * 2 * Math.PI * 2; // 2Hz 사인파
+        const y = canvas.height / 2 + Math.sin(t) * 80;
+        ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = '#ff5500';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 샘플링 점 찍기
+      for (let i = 0; i <= samples; i++) {
+        const x = (i / samples) * canvas.width;
+        const t = i / samples * 2 * Math.PI * 2;
+        const y = canvas.height / 2 + Math.sin(t) * 80;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0055ff';
+        ctx.fill();
+      }
+    }
+
+    frequencyInput.addEventListener('input', () => {
+      drawWave(frequencyInput.value);
+    });
+
+    drawWave(frequencyInput.value);
+  </script>
+</body>
+</html>

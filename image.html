@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그림의 디지털 표현</title>
+  <link rel="stylesheet" href="styles.css" />
+<style>
+  #pixelCanvas {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 1px;
+    margin: 20px 0;
+    border: 2px solid #ccc;
+    background-color: #ddd;
+  }
+
+  .pixel {
+    width: 30px;
+    height: 30px;
+    background-color: #ffffff;
+    cursor: pointer;
+    border: 1px solid #eee;
+  }
+
+  .color-picker {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 15px;
+  }
+
+  .color-picker label {
+    font-weight: bold;
+  }
+
+  /* 캔버스 스타일 */
+  .canvas-grid {
+    display: grid;
+    gap: 1px;
+    margin-top: 20px;
+    grid-template-columns: repeat(10, 30px); /* 기본 10x10 그리드로 설정 */
+    grid-template-rows: repeat(10, 30px); /* 기본 10x10 그리드로 설정 */
+  }
+
+  .canvas-preview-wrapper {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 1px;
+  }
+
+  .preview-pixel {
+    width: 30px;
+    height: 30px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>그림의 디지털 표현 (RGB 및 픽셀 아트)</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>RGB 색상 모델</h2>
+      <p>여러 색상 팔레트에서 색을 선택하고 픽셀을 클릭하여 그림을 그려보세요!</p>
+
+      <!-- 1. 색상 팔레트 설정 -->
+      <div class="section">
+        <h2>1️⃣ 색상 팔레트 구성</h2>
+        <label>몇 개의 색을 사용할까요?</label>
+        <input type="number" id="numColors" min="1" max="10" />
+        <button onclick="generatePalette()">팔레트 만들기</button>
+        <div id="paletteArea"></div>
+      </div>
+
+      <!-- 2 & 3. 캔버스 + 미리보기 나란히 배치 -->
+      <div class="section">
+        <h2>2️⃣ 캔버스 설정 & 3️⃣ 도트 아트 미리보기</h2>
+        <div class="canvas-preview-wrapper">
+          <div>
+            <div class="canvas-controls">
+              <label>가로: </label>
+              <input type="number" id="canvasCols" value="10" min="1" max="50">
+              <label>세로: </label>
+              <input type="number" id="canvasRows" value="10" min="1" max="50">
+              <button onclick="generateCanvas()">그림판 만들기</button>
+            </div>
+            <div class="canvas-grid" id="canvasGrid"></div>
+          </div>
+          <div>
+            <h3>미리보기</h3>
+            <div class="preview-grid" id="previewGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script>
+    let canvasRows = 10;
+    let canvasCols = 10;
+
+    function generatePalette() {
+      const num = parseInt(document.getElementById("numColors").value);
+      const area = document.getElementById("paletteArea");
+      area.innerHTML = '';
+
+      for (let i = 0; i < num; i++) {
+        const row = document.createElement('div');
+        row.className = 'color-row';
+
+        const label = document.createElement('span');
+        label.textContent = `Color ${i + 1}:`;
+
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+
+        const binaryInput = document.createElement('input');
+        binaryInput.type = 'text';
+        binaryInput.className = 'binary-input';
+        binaryInput.placeholder = 'e.g. 0101';
+
+        row.appendChild(label);
+        row.appendChild(colorPicker);
+        row.appendChild(document.createTextNode(" Binary: "));
+        row.appendChild(binaryInput);
+
+        area.appendChild(row);
+      }
+    }
+
+    function generateCanvas() {
+      canvasCols = parseInt(document.getElementById("canvasCols").value);
+      canvasRows = parseInt(document.getElementById("canvasRows").value);
+
+      const grid = document.getElementById("canvasGrid");
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${canvasCols}, 30px)`;
+      grid.style.gridTemplateRows = `repeat(${canvasRows}, 30px)`;
+
+      for (let i = 0; i < canvasCols * canvasRows; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 8;
+        input.className = 'pixel';
+
+        input.addEventListener('input', () => {
+          applyColor(input);
+          updatePreview();
+        });
+
+        grid.appendChild(input);
+      }
+
+      updatePreview();
+    }
+
+    function getPaletteMap() {
+      const rows = document.querySelectorAll(".color-row");
+      const map = {};
+
+      rows.forEach(row => {
+        const color = row.querySelector('input[type="color"]').value;
+        const code = row.querySelector('.binary-input').value.trim();
+        if (code !== '') {
+          map[code] = color;
+        }
+      });
+
+      return map;
+    }
+
+    function applyColor(input) {
+      const map = getPaletteMap();
+      const inputCode = input.value.trim();
+      if (map[inputCode]) {
+        input.style.backgroundColor = map[inputCode];
+        input.style.color = "#fff";
+      } else {
+        input.style.backgroundColor = "#fff";
+        input.style.color = "#000";
+      }
+    }
+
+    function updatePreview() {
+      const map = getPaletteMap();
+      const preview = document.getElementById("previewGrid");
+      const inputs = document.querySelectorAll(".pixel");
+
+      preview.innerHTML = '';
+      preview.style.gridTemplateColumns = `repeat(${canvasCols}, 30px)`;
+      preview.style.gridTemplateRows = `repeat(${canvasRows}, 30px)`;
+
+      inputs.forEach(input => {
+        const code = input.value.trim();
+        const color = map[code] || "#fff";
+
+        const dot = document.createElement("div");
+        dot.className = "preview-pixel";
+        dot.style.backgroundColor = color;
+
+        preview.appendChild(dot);
+      });
+    }
+
+    document.getElementById('imageLoader').addEventListener('change', handleImage, false);
+
+    function handleImage(e) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          const rows = parseInt(document.getElementById("canvasRows").value);
+          const cols = parseInt(document.getElementById("canvasCols").value);
+          canvas.width = cols;
+          canvas.height = rows;
+
+          ctx.drawImage(img, 0, 0, cols, rows);
+
+          const imageData = ctx.getImageData(0, 0, cols, rows);
+          const data = imageData.data;
+
+          const paletteMap = getPaletteMap();
+          const colorToBinary = {};
+          for (let bin in paletteMap) {
+            colorToBinary[paletteMap[bin]] = bin;
+          }
+
+          const inputs = document.querySelectorAll(".pixel");
+          for (let i = 0; i < cols * rows; i++) {
+            const r = data[i * 4];
+            const g = data[i * 4 + 1];
+            const b = data[i * 4 + 2];
+
+            const closestColor = getClosestColor(`rgb(${r},${g},${b})`, paletteMap);
+            const binaryCode = colorToBinary[closestColor] || '';
+
+            inputs[i].value = binaryCode;
+            applyColor(inputs[i]);
+          }
+
+          updatePreview();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function getClosestColor(targetRgb, paletteMap) {
+      const rgb = targetRgb.match(/\d+/g).map(Number);
+      let closest = null;
+      let minDist = Infinity;
+
+      for (let code in paletteMap) {
+        const hex = paletteMap[code];
+        const pr = parseInt(hex.substr(1, 2), 16);
+        const pg = parseInt(hex.substr(3, 2), 16);
+        const pb = parseInt(hex.substr(5, 2), 16);
+
+        const dist = Math.sqrt((rgb[0]-pr)**2 + (rgb[1]-pg)**2 + (rgb[2]-pb)**2);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = hex;
+        }
+      }
+
+      return closest;
+    }
+  </script>
+</body>
+</html>

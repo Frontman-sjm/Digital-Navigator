@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문자의 디지털 표현</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>문자의 디지털 표현 (ASCII & 유니코드)</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>ASCII & 유니코드 변환기</h2>
+      <p>문자를 입력하면 해당 문자의 <strong>ASCII</strong> 및 <strong>유니코드</strong> 값을 확인할 수 있습니다.</p>
+      <input type="text" id="asciiInput" placeholder="문자를 입력하세요 (예: A)" />
+      <button onclick="convertToASCIIAndUnicode()">변환하기</button>
+      <div id="asciiResult"></div>
+      <div id="unicodeResult"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script>
+    function convertToASCIIAndUnicode() {
+      const input = document.getElementById("asciiInput").value.trim();
+      const asciiResult = document.getElementById("asciiResult");
+      const unicodeResult = document.getElementById("unicodeResult");
+
+      if (input === "") {
+        asciiResult.innerHTML = "<p class='warning'>문자를 입력해주세요.</p>";
+        unicodeResult.innerHTML = "";
+        return;
+      }
+
+      let asciiHTML = "<div class='card'><h3>ASCII 코드</h3><ul>";
+      let unicodeHTML = "<div class='card'><h3>유니코드</h3><ul>";
+
+      for (const char of input) {
+        const code = char.charCodeAt(0);
+        asciiHTML += `<li><strong>${char}</strong>: ${code <= 127 ? code : '지원 안 함'}</li>`;
+        unicodeHTML += `<li><strong>${char}</strong>: U+${code.toString(16).toUpperCase().padStart(4, '0')}</li>`;
+      }
+
+      asciiHTML += "</ul></div>";
+      unicodeHTML += "</ul></div>";
+
+      asciiResult.innerHTML = asciiHTML;
+      unicodeResult.innerHTML = unicodeHTML;
+    }
+  </script>
+</body>
+</html>

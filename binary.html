@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이진수란?</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .bit-box {
+      display: flex;
+      gap: 6px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .bit {
+      width: 40px;
+      height: 40px;
+      background-color: #e0f2f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #00796b;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .bit-label {
+      font-size: 0.9rem;
+      margin-top: 5px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>이진수란?</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>이진수 변환기</h2>
+      <p>십진수를 이진수로 바꾸고, 그 이진수가 몇 비트로 표현되는지 확인해보세요!</p>
+      <input type="number" id="decimalInput" placeholder="숫자를 입력하세요 (예: 13)" />
+      <button onclick="convertToBinary()">변환하기</button>
+      <div id="binaryResult"></div>
+      <div class="bit-box" id="bitBox"></div>
+    </section>
+
+    <section>
+      <h3>이진수와 비트</h3>
+      <p><strong>비트(Bit)</strong>는 컴퓨터에서 정보를 표현하는 가장 작은 단위입니다.</p>
+      <ul>
+        <li>1비트: 0 또는 1 (두 가지 값)</li>
+        <li>2비트: 4개의 값 (00, 01, 10, 11)</li>
+        <li>8비트 = 1바이트(Byte): 총 256개의 값 표현 가능</li>
+        <li>n비트로 표현 가능한 경우의 수: 2ⁿ</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script>
+    function convertToBinary() {
+      const input = document.getElementById("decimalInput").value;
+      const resultDiv = document.getElementById("binaryResult");
+      const bitBox = document.getElementById("bitBox");
+
+      if (input === "" || isNaN(input)) {
+        resultDiv.innerHTML = "<p>숫자를 정확히 입력해주세요.</p>";
+        bitBox.innerHTML = "";
+        return;
+      }
+
+      const decimal = parseInt(input, 10);
+      const binaryStr = decimal.toString(2);
+      const bitCount = binaryStr.length;
+
+      resultDiv.innerHTML = `<p><strong>${decimal}</strong>는 이진수로 <strong>${binaryStr}</strong> 입니다. (${bitCount}비트)</p>`;
+
+      // 시각화
+      bitBox.innerHTML = "";
+      for (let bit of binaryStr.padStart(8, '0')) {
+        const bitDiv = document.createElement("div");
+        bitDiv.className = "bit";
+        bitDiv.textContent = bit;
+        bitBox.appendChild(bitDiv);
+      }
+    }
+  </script>
+</body>
+</html>
