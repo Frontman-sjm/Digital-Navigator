@@ -33,16 +33,27 @@
     </section>
 
     <section>
-      <div class="converter">
-        <h3>이진수 변환기</h3>
-        <div class="input-group">
-          <label for="decimalInput">10진수 입력 (0-255):</label>
-          <div class="input-wrapper">
-            <input type="number" id="decimalInput" min="0" max="255" placeholder="0-255 사이의 숫자를 입력하세요">
-            <button onclick="convertToBinary()">변환하기</button>
+      <div class="binary-converter">
+        <div class="converter-box">
+          <h3>이진수 변환기</h3>
+          <p>10진수를 2진수로 변환해보세요. 0부터 255까지의 숫자를 입력하면 8비트 이진수로 변환됩니다.</p>
+          <div class="input-guide">
+            <strong>사용 방법</strong><br>
+            <ul>
+              <li>0부터 255 사이의 숫자를 입력하세요</li>
+              <li>변환하기 버튼을 클릭하면 8비트 이진수로 변환됩니다</li>
+              <li>각 비트의 위치와 값을 확인할 수 있습니다</li>
+            </ul>
           </div>
+          <div class="input-group">
+            <label for="decimalInput">10진수 입력 (0-255):</label>
+            <div class="input-wrapper">
+              <input type="number" id="decimalInput" min="0" max="255" placeholder="0-255 사이의 숫자를 입력하세요">
+              <button onclick="convertToBinary()">변환하기</button>
+            </div>
+          </div>
+          <div class="result" id="binaryResult">이진수 결과가 여기에 표시됩니다</div>
         </div>
-        <div class="result" id="binaryResult">이진수 결과가 여기에 표시됩니다</div>
       </div>
     </section>
 
@@ -72,10 +83,6 @@
       </div>
     </div>
   </main>
-
-  <footer>
-    <p>&copy; 2025 디지털 교육</p>
-  </footer>
 
   <script src="../assets/js/binary.js"></script>
 </body>
