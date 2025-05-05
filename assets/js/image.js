@@ -11,7 +11,7 @@ function generatePalette() {
     row.className = 'color-row';
 
     const label = document.createElement('span');
-    label.textContent = `Color ${i + 1}:`;
+    label.textContent = `색상 ${i + 1}:`;
 
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
@@ -19,11 +19,11 @@ function generatePalette() {
     const binaryInput = document.createElement('input');
     binaryInput.type = 'text';
     binaryInput.className = 'binary-input';
-    binaryInput.placeholder = 'e.g. 0101';
+    binaryInput.placeholder = '예: 0101';
 
     row.appendChild(label);
     row.appendChild(colorPicker);
-    row.appendChild(document.createTextNode(" Binary: "));
+    row.appendChild(document.createTextNode(" 이진수: "));
     row.appendChild(binaryInput);
 
     area.appendChild(row);
