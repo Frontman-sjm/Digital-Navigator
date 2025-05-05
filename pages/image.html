@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그림의 디지털 표현</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>그림의 디지털 표현 (RGB 및 픽셀 아트)</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>RGB 색상 모델</h2>
+      <p>여러 색상 팔레트에서 색을 선택하고 픽셀을 클릭하여 그림을 그려보세요!</p>
+
+      <!-- 1. 색상 팔레트 설정 -->
+      <div class="section">
+        <h2>1️⃣ 색상 팔레트 구성</h2>
+        <label>몇 개의 색을 사용할까요?</label>
+        <input type="number" id="numColors" min="1" max="10" />
+        <button onclick="generatePalette()">팔레트 만들기</button>
+        <div id="paletteArea"></div>
+      </div>
+
+      <!-- 2 & 3. 캔버스 + 미리보기 나란히 배치 -->
+      <div class="section">
+        <h2>2️⃣ 캔버스 설정 & 3️⃣ 도트 아트 미리보기</h2>
+        <div class="canvas-preview-wrapper">
+          <div>
+            <div class="canvas-controls">
+              <label>가로: </label>
+              <input type="number" id="canvasCols" value="10" min="1" max="50">
+              <label>세로: </label>
+              <input type="number" id="canvasRows" value="10" min="1" max="50">
+              <button onclick="generateCanvas()">그림판 만들기</button>
+            </div>
+            <div class="canvas-grid" id="canvasGrid"></div>
+          </div>
+          <div>
+            <h3>미리보기</h3>
+            <div class="preview-grid" id="previewGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script src="../assets/js/image.js"></script>
+</body>
+</html>

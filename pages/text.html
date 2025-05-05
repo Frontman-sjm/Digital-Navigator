@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문자의 디지털 표현</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>문자의 디지털 표현 (ASCII & 유니코드)</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>ASCII 코드 표</h2>
+      <div class="ascii-table">
+        <div class="ascii-section">
+          <h3>제어 문자 (0-31)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>이진수</th>
+                <th>십진수</th>
+                <th>16진수</th>
+                <th>문자</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody id="controlCharsTable">
+              <!-- JavaScript로 채워질 부분 -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ascii-section">
+          <h3>인쇄 가능 문자 (32-127)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>이진수</th>
+                <th>십진수</th>
+                <th>16진수</th>
+                <th>문자</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody id="printableCharsTable">
+              <!-- JavaScript로 채워질 부분 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>ASCII & 유니코드 변환기</h2>
+      <p>문자를 입력하면 해당 문자의 <strong>ASCII</strong> 및 <strong>유니코드</strong> 값을 확인할 수 있습니다.</p>
+      <input type="text" id="asciiInput" placeholder="문자를 입력하세요 (예: A)" />
+      <button onclick="convertToASCIIAndUnicode()">변환하기</button>
+      <div id="asciiResult"></div>
+      <div id="unicodeResult"></div>
+    </section>
+
+    <section>
+      <h2>이진코드 변환기</h2>
+      <p>이진코드를 입력하면 해당하는 문자를 확인할 수 있습니다.</p>
+      <input type="text" id="binaryInput" placeholder="이진코드를 입력하세요 (예: 01000001)" />
+      <button onclick="convertBinaryToChar()">변환하기</button>
+      <div id="binaryResult"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script src="../assets/js/text.js"></script>
+</body>
+</html>

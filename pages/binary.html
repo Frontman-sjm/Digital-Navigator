@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이진수란?</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>이진수란?</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>이진수와 비트</h2>
+      <p><strong>비트(Bit)</strong>는 컴퓨터에서 정보를 표현하는 가장 작은 단위입니다.</p>
+      <ul>
+        <li>1비트: 0 또는 1 (두 가지 값)</li>
+        <li>2비트: 4개의 값 (00, 01, 10, 11)</li>
+        <li>8비트 = 1바이트(Byte): 총 256개의 값 표현 가능</li>
+        <li>n비트로 표현 가능한 경우의 수: 2ⁿ</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>이진수 변환기</h2>
+      <p>십진수를 이진수로 바꾸고, 그 이진수가 몇 비트로 표현되는지 확인해보세요!</p>
+      <input type="number" id="decimalInput" placeholder="숫자를 입력하세요 (예: 13)" />
+      <button onclick="convertToBinary()">변환하기</button>
+      <div id="binaryResult"></div>
+      <div class="bit-box" id="bitBox"></div>
+    </section>
+
+    <section>
+      <h2>이진수 퀴즈</h2>
+      <p>다음 이진수를 십진수로 변환해보세요!</p>
+      <div id="quizContainer">
+        <div id="quizQuestion"></div>
+        <input type="number" id="quizAnswer" placeholder="답을 입력하세요" />
+        <button onclick="checkAnswer()">정답 확인</button>
+        <div id="quizResult"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 디지털 교육</p>
+  </footer>
+
+  <script src="../assets/js/binary.js"></script>
+</body>
+</html>
