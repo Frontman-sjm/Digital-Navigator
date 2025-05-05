@@ -29,33 +29,67 @@ function convertToBinary() {
 let currentBinary = '';
 let currentDecimal = 0;
 
-function generateQuiz() {
-  // 0부터 255 사이의 랜덤 숫자 생성
-  currentDecimal = Math.floor(Math.random() * 256);
-  currentBinary = currentDecimal.toString(2).padStart(8, '0');
-  
-  const questionDiv = document.getElementById('quizQuestion');
-  questionDiv.innerHTML = `<p>이진수 <strong>${currentBinary}</strong>를 십진수로 변환하면?</p>`;
-  
-  // 입력 필드 초기화
+// 모달 열기
+function startQuiz() {
+  generateQuiz();
+  const modal = document.getElementById('quizModal');
+  modal.classList.add('show');
   document.getElementById('quizAnswer').value = '';
-  document.getElementById('quizResult').innerHTML = '';
+  document.getElementById('quizResult').textContent = '';
+  document.getElementById('quizResult').className = 'quiz-result';
 }
 
+// 모달 닫기
+function closeQuizModal() {
+  const modal = document.getElementById('quizModal');
+  modal.classList.remove('show');
+}
+
+// 퀴즈 생성
+function generateQuiz() {
+  currentDecimal = Math.floor(Math.random() * 256); // 0-255 사이의 랜덤 숫자
+  currentBinary = currentDecimal.toString(2).padStart(8, '0');
+  document.getElementById('quizQuestion').textContent = `이진수 ${currentBinary}를 십진수로 변환하면?`;
+}
+
+// 정답 확인
 function checkAnswer() {
   const userAnswer = parseInt(document.getElementById('quizAnswer').value);
   const resultDiv = document.getElementById('quizResult');
   
   if (isNaN(userAnswer)) {
-    resultDiv.innerHTML = '<p class="warning">숫자를 입력해주세요.</p>';
+    resultDiv.textContent = '숫자를 입력해주세요.';
+    resultDiv.className = 'quiz-result incorrect';
     return;
   }
-  
+
   if (userAnswer === currentDecimal) {
-    resultDiv.innerHTML = '<p class="success">정답입니다! 🎉</p>';
-    setTimeout(generateQuiz, 2000); // 2초 후 다음 문제
+    resultDiv.textContent = '정답입니다! 🎉';
+    resultDiv.className = 'quiz-result correct';
+    setTimeout(() => {
+      generateQuiz();
+      document.getElementById('quizAnswer').value = '';
+      resultDiv.textContent = '';
+      resultDiv.className = 'quiz-result';
+    }, 2000);
   } else {
-    resultDiv.innerHTML = `<p class="error">틀렸습니다. 다시 한번 생각해보세요.</p>`;
+    resultDiv.textContent = `틀렸습니다. 정답은 ${currentDecimal}입니다.`;
+    resultDiv.className = 'quiz-result incorrect';
+  }
+}
+
+// Enter 키로 정답 확인
+document.getElementById('quizAnswer').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    checkAnswer();
+  }
+});
+
+// 모달 외부 클릭 시 닫기
+window.onclick = function(event) {
+  const modal = document.getElementById('quizModal');
+  if (event.target === modal) {
+    closeQuizModal();
   }
 }
 
