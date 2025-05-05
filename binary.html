@@ -51,6 +51,17 @@
 
   <main>
     <section>
+      <h2>이진수와 비트</h2>
+      <p><strong>비트(Bit)</strong>는 컴퓨터에서 정보를 표현하는 가장 작은 단위입니다.</p>
+      <ul>
+        <li>1비트: 0 또는 1 (두 가지 값)</li>
+        <li>2비트: 4개의 값 (00, 01, 10, 11)</li>
+        <li>8비트 = 1바이트(Byte): 총 256개의 값 표현 가능</li>
+        <li>n비트로 표현 가능한 경우의 수: 2ⁿ</li>
+      </ul>
+    </section>
+
+    <section>
       <h2>이진수 변환기</h2>
       <p>십진수를 이진수로 바꾸고, 그 이진수가 몇 비트로 표현되는지 확인해보세요!</p>
       <input type="number" id="decimalInput" placeholder="숫자를 입력하세요 (예: 13)" />
@@ -60,14 +71,14 @@
     </section>
 
     <section>
-      <h3>이진수와 비트</h3>
-      <p><strong>비트(Bit)</strong>는 컴퓨터에서 정보를 표현하는 가장 작은 단위입니다.</p>
-      <ul>
-        <li>1비트: 0 또는 1 (두 가지 값)</li>
-        <li>2비트: 4개의 값 (00, 01, 10, 11)</li>
-        <li>8비트 = 1바이트(Byte): 총 256개의 값 표현 가능</li>
-        <li>n비트로 표현 가능한 경우의 수: 2ⁿ</li>
-      </ul>
+      <h2>이진수 퀴즈</h2>
+      <p>다음 이진수를 십진수로 변환해보세요!</p>
+      <div id="quizContainer">
+        <div id="quizQuestion"></div>
+        <input type="number" id="quizAnswer" placeholder="답을 입력하세요" />
+        <button onclick="checkAnswer()">정답 확인</button>
+        <div id="quizResult"></div>
+      </div>
     </section>
   </main>
 
@@ -75,33 +86,6 @@
     <p>&copy; 2025 디지털 교육</p>
   </footer>
 
-  <script>
-    function convertToBinary() {
-      const input = document.getElementById("decimalInput").value;
-      const resultDiv = document.getElementById("binaryResult");
-      const bitBox = document.getElementById("bitBox");
-
-      if (input === "" || isNaN(input)) {
-        resultDiv.innerHTML = "<p>숫자를 정확히 입력해주세요.</p>";
-        bitBox.innerHTML = "";
-        return;
-      }
-
-      const decimal = parseInt(input, 10);
-      const binaryStr = decimal.toString(2);
-      const bitCount = binaryStr.length;
-
-      resultDiv.innerHTML = `<p><strong>${decimal}</strong>는 이진수로 <strong>${binaryStr}</strong> 입니다. (${bitCount}비트)</p>`;
-
-      // 시각화
-      bitBox.innerHTML = "";
-      for (let bit of binaryStr.padStart(8, '0')) {
-        const bitDiv = document.createElement("div");
-        bitDiv.className = "bit";
-        bitDiv.textContent = bit;
-        bitBox.appendChild(bitDiv);
-      }
-    }
-  </script>
+  <script src="js/binary.js"></script>
 </body>
 </html>

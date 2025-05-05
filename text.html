@@ -5,6 +5,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>문자의 디지털 표현</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .ascii-table {
+      margin: 20px 0;
+      overflow-x: auto;
+      font-size: 0.8rem;
+    }
+
+    .ascii-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: monospace;
+      table-layout: fixed;
+    }
+
+    .ascii-table th,
+    .ascii-table td {
+      padding: 4px;
+      text-align: center;
+      border: 1px solid #ddd;
+      white-space: nowrap;
+    }
+
+    .ascii-table th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+
+    .ascii-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .ascii-table tr:hover {
+      background-color: #f0f0f0;
+    }
+
+    .control-char {
+      color: #666;
+      font-style: italic;
+    }
+
+    .printable-char {
+      color: #000;
+    }
+
+    .ascii-section {
+      margin-bottom: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .ascii-section h3 {
+      margin: 10px 0;
+      color: #333;
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 5px 0;
+    }
+
+    /* 컬럼 너비 조정 */
+    .ascii-table th:nth-child(1),
+    .ascii-table td:nth-child(1) {
+      width: 15%;
+    }
+
+    .ascii-table th:nth-child(2),
+    .ascii-table td:nth-child(2) {
+      width: 10%;
+    }
+
+    .ascii-table th:nth-child(3),
+    .ascii-table td:nth-child(3) {
+      width: 10%;
+    }
+
+    .ascii-table th:nth-child(4),
+    .ascii-table td:nth-child(4) {
+      width: 10%;
+    }
+
+    .ascii-table th:nth-child(5),
+    .ascii-table td:nth-child(5) {
+      width: 55%;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -22,6 +109,47 @@
 
   <main>
     <section>
+      <h2>ASCII 코드 표</h2>
+      <div class="ascii-table">
+        <div class="ascii-section">
+          <h3>제어 문자 (0-31)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>이진수</th>
+                <th>십진수</th>
+                <th>16진수</th>
+                <th>문자</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody id="controlCharsTable">
+              <!-- JavaScript로 채워질 부분 -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ascii-section">
+          <h3>인쇄 가능 문자 (32-127)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>이진수</th>
+                <th>십진수</th>
+                <th>16진수</th>
+                <th>문자</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody id="printableCharsTable">
+              <!-- JavaScript로 채워질 부분 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <h2>ASCII & 유니코드 변환기</h2>
       <p>문자를 입력하면 해당 문자의 <strong>ASCII</strong> 및 <strong>유니코드</strong> 값을 확인할 수 있습니다.</p>
       <input type="text" id="asciiInput" placeholder="문자를 입력하세요 (예: A)" />
@@ -29,39 +157,20 @@
       <div id="asciiResult"></div>
       <div id="unicodeResult"></div>
     </section>
+
+    <section>
+      <h2>이진코드 변환기</h2>
+      <p>이진코드를 입력하면 해당하는 문자를 확인할 수 있습니다.</p>
+      <input type="text" id="binaryInput" placeholder="이진코드를 입력하세요 (예: 01000001)" />
+      <button onclick="convertBinaryToChar()">변환하기</button>
+      <div id="binaryResult"></div>
+    </section>
   </main>
 
   <footer>
     <p>&copy; 2025 디지털 교육</p>
   </footer>
 
-  <script>
-    function convertToASCIIAndUnicode() {
-      const input = document.getElementById("asciiInput").value.trim();
-      const asciiResult = document.getElementById("asciiResult");
-      const unicodeResult = document.getElementById("unicodeResult");
-
-      if (input === "") {
-        asciiResult.innerHTML = "<p class='warning'>문자를 입력해주세요.</p>";
-        unicodeResult.innerHTML = "";
-        return;
-      }
-
-      let asciiHTML = "<div class='card'><h3>ASCII 코드</h3><ul>";
-      let unicodeHTML = "<div class='card'><h3>유니코드</h3><ul>";
-
-      for (const char of input) {
-        const code = char.charCodeAt(0);
-        asciiHTML += `<li><strong>${char}</strong>: ${code <= 127 ? code : '지원 안 함'}</li>`;
-        unicodeHTML += `<li><strong>${char}</strong>: U+${code.toString(16).toUpperCase().padStart(4, '0')}</li>`;
-      }
-
-      asciiHTML += "</ul></div>";
-      unicodeHTML += "</ul></div>";
-
-      asciiResult.innerHTML = asciiHTML;
-      unicodeResult.innerHTML = unicodeHTML;
-    }
-  </script>
+  <script src="js/text.js"></script>
 </body>
 </html>
