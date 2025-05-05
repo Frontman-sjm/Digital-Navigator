@@ -542,7 +542,7 @@ footer p {
 
 .converter-box p {
   font-size: 1.1rem;
-  line-height: 1.8;
+  line-height: 1.6;
   color: #34495e;
   margin-bottom: 2rem;
   padding: 1.5rem;
@@ -1369,8 +1369,9 @@ canvas {
 
 .binary-converter .input-wrapper {
   display: flex;
-  gap: 0.8rem;
+  gap: 1rem;
   align-items: center;
+  width: 100%;
 }
 
 .binary-converter .converter-box input[type="number"] {
@@ -1384,10 +1385,19 @@ canvas {
   color: #2c3e50;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   letter-spacing: 0.5px;
+  min-width: 0;
+  width: 50%;
+}
+
+.binary-converter .converter-box input[type="number"]::placeholder {
+  color: #95a5a6;
+  font-size: 1.1rem;
+  padding: 0.2rem;
 }
 
 .binary-converter .converter-box button {
-  padding: 1rem 2rem;
+  flex: 1;
+  padding: 1rem 1.5rem;
   background: linear-gradient(135deg, #3498db, #2ecc71);
   color: white;
   border: none;
@@ -1402,6 +1412,7 @@ canvas {
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(52, 152, 219, 0.2);
   white-space: nowrap;
+  width: 50%;
 }
 
 .binary-converter .result {
@@ -1437,6 +1448,8 @@ canvas {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .binary-converter .input-guide {
@@ -1519,13 +1532,11 @@ canvas {
   .binary-converter .converter-box input[type="number"] {
     width: 100%;
     font-size: 1.1rem;
-    padding: 0.8rem 1.2rem;
   }
 
   .binary-converter .converter-box button {
     width: 100%;
     font-size: 1.1rem;
-    padding: 0.8rem 1.5rem;
   }
 
   .binary-converter .result {
@@ -1538,6 +1549,7 @@ canvas {
     font-size: 1rem;
     padding: 1rem;
     margin-bottom: 1.2rem;
+    width: 100%;
   }
 
   .binary-converter .input-guide {
