@@ -23,38 +23,66 @@
   <main>
     <section>
       <h2>ASCII 코드 표</h2>
+      <p class="intro-text">
+        컴퓨터는 모든 문자를 숫자로 저장해요. ASCII 코드는 영어 알파벳, 숫자, 특수문자 등을 
+        컴퓨터가 이해할 수 있는 숫자로 변환한 표입니다. 아래 표에서 자주 사용되는 문자들의 
+        코드를 확인해보세요!
+      </p>
+      
       <div class="ascii-table">
         <div class="ascii-section">
-          <h3>제어 문자 (0-31)</h3>
+          <h3>제어 문자 (0-31, 127)</h3>
+          <p class="section-desc">
+            제어 문자는 화면에 보이지 않는 특별한 명령을 내리는 문자예요. 
+            예를 들어, 줄바꿈이나 탭 같은 기능을 수행합니다.
+          </p>
+          <div class="example-box">
+            <strong>자주 사용되는 제어 문자:</strong>
+            <ul>
+              <li>줄바꿈 (Enter): 새로운 줄로 이동</li>
+              <li>탭 (Tab): 일정 간격 띄우기</li>
+              <li>백스페이스: 이전 글자 지우기</li>
+            </ul>
+          </div>
           <table>
             <thead>
               <tr>
                 <th>이진수</th>
                 <th>십진수</th>
-                <th>16진수</th>
                 <th>문자</th>
                 <th>설명</th>
               </tr>
             </thead>
-            <tbody id="controlCharsTable">
+            <tbody id="controlChars">
               <!-- JavaScript로 채워질 부분 -->
             </tbody>
           </table>
         </div>
 
         <div class="ascii-section">
-          <h3>인쇄 가능 문자 (32-127)</h3>
+          <h3>출력 가능 문자 (32-126)</h3>
+          <p class="section-desc">
+            출력 가능 문자는 화면에 보이는 일반적인 문자들입니다. 
+            영어 알파벳, 숫자, 특수문자 등이 여기에 포함됩니다.
+          </p>
+          <div class="example-box">
+            <strong>자주 사용되는 문자:</strong>
+            <ul>
+              <li>대문자 A-Z: 65-90</li>
+              <li>소문자 a-z: 97-122</li>
+              <li>숫자 0-9: 48-57</li>
+            </ul>
+          </div>
           <table>
             <thead>
               <tr>
                 <th>이진수</th>
                 <th>십진수</th>
-                <th>16진수</th>
                 <th>문자</th>
                 <th>설명</th>
               </tr>
             </thead>
-            <tbody id="printableCharsTable">
+            <tbody id="printableChars">
               <!-- JavaScript로 채워질 부분 -->
             </tbody>
           </table>
@@ -65,18 +93,31 @@
     <section>
       <h2>ASCII & 유니코드 변환기</h2>
       <p>문자를 입력하면 해당 문자의 <strong>ASCII</strong> 및 <strong>유니코드</strong> 값을 확인할 수 있습니다.</p>
-      <input type="text" id="asciiInput" placeholder="문자를 입력하세요 (예: A)" />
-      <button onclick="convertToASCIIAndUnicode()">변환하기</button>
-      <div id="asciiResult"></div>
-      <div id="unicodeResult"></div>
+      <div class="converter-box">
+        <input type="text" id="asciiInput" placeholder="문자를 입력하세요 (예: A)" />
+        <button onclick="convertToASCIIAndUnicode()">변환하기</button>
+        <div id="asciiResult"></div>
+        <div id="unicodeResult"></div>
+      </div>
     </section>
 
     <section>
       <h2>이진코드 변환기</h2>
       <p>이진코드를 입력하면 해당하는 문자를 확인할 수 있습니다.</p>
-      <input type="text" id="binaryInput" placeholder="이진코드를 입력하세요 (예: 01000001)" />
-      <button onclick="convertBinaryToChar()">변환하기</button>
-      <div id="binaryResult"></div>
+      <div class="converter-box">
+        <h3>이진코드 변환기</h3>
+        <input type="text" id="binaryInput" placeholder="이진코드를 입력하세요 (예: 01001000 01101001)">
+        <div class="input-guide">
+          <strong>※ 주의사항</strong>
+          <ul>
+            <li>각 문자는 8비트(8자리)로 입력해주세요.</li>
+            <li>문자 사이에 <strong>반드시 띄어쓰기</strong>를 해주세요.</li>
+            <li>예시: 01001000 01101001 (Hi)</li>
+          </ul>
+        </div>
+        <button onclick="convertBinaryToChar()">변환하기</button>
+        <div id="binaryResult"></div>
+      </div>
     </section>
   </main>
 
