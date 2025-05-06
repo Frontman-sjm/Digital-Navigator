@@ -1186,16 +1186,35 @@ footer p {
   transform: translateY(0);
 }
 
-.canvas-grid, .preview-grid {
+.canvas-grid {
   display: grid;
   gap: 1px;
   background: #e0e0e0;
   padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ccc;
 }
 
-.pixel, .preview-pixel {
+.preview-grid {
+  display: grid;
+  gap: 0;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.pixel {
+  width: 30px;
+  height: 30px;
+  background: white;
+  border: 1px solid #ccc;
+  transition: all 0.2s ease;
+}
+
+.preview-pixel {
   width: 30px;
   height: 30px;
   background: white;
@@ -2342,15 +2361,16 @@ canvas {
   }
 }
 
-.canvas-section, .preview-section {
+.canvas-section {
   margin-top: 2rem;
-  padding: 1.5rem;
+  padding: 2rem;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.canvas-section h3, .preview-section h3 {
+.canvas-section h3 {
   font-size: 1.3rem;
   color: #2c3e50;
   margin-bottom: 1.5rem;
@@ -2358,9 +2378,15 @@ canvas {
   border-bottom: 2px solid rgba(52, 152, 219, 0.1);
 }
 
+.canvas-grid-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
 .canvas-grid, .preview-grid {
   display: grid;
-  gap: 1px;
   background: #e0e0e0;
   padding: 1rem;
   border-radius: 12px;
@@ -2382,12 +2408,16 @@ canvas {
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .canvas-section, .preview-section {
-    margin-top: 1.5rem;
-    padding: 1.2rem;
+  .canvas-section {
+    padding: 1.5rem;
   }
 
-  .canvas-section h3, .preview-section h3 {
+  .canvas-grid-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .canvas-section h3 {
     font-size: 1.2rem;
     margin-bottom: 1.2rem;
   }

@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', function() {
 let canvasRows = 10;
 let canvasCols = 10;
 
@@ -52,6 +53,7 @@ function generatePalette() {
     area.appendChild(row);
   }
 }
+window.generatePalette = generatePalette;
 
 function generateCanvas() {
   canvasCols = parseInt(document.getElementById("canvasCols").value);
@@ -82,6 +84,7 @@ function generateCanvas() {
   
   updatePreview();
 }
+window.generateCanvas = generateCanvas;
 
 function getPaletteMap() {
   const rows = document.querySelectorAll(".color-row");
@@ -131,7 +134,10 @@ function updatePreview() {
   });
 }
 
-document.getElementById('imageLoader').addEventListener('change', handleImage, false);
+const imageLoader = document.getElementById('imageLoader');
+if (imageLoader) {
+  imageLoader.addEventListener('change', handleImage, false);
+}
 
 function handleImage(e) {
   const reader = new FileReader();
@@ -196,4 +202,5 @@ function getClosestColor(targetRgb, paletteMap) {
   }
 
   return closest;
-} 
+}
+}); 
