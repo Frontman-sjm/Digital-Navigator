@@ -30,11 +30,21 @@
         <h4>1️⃣ 색상 팔레트 구성</h4>
         <div class="color-controls">
           <div class="input-group">
+            <label for="bitCount">비트 수를 선택하세요:</label>
+            <select id="bitCount">
+              <option value="1">1비트 (2색)</option>
+              <option value="2">2비트 (4색)</option>
+              <option value="3">3비트 (8색)</option>
+              <option value="4">4비트 (16색)</option>
+            </select>
+          </div>
+          <div class="input-group">
             <label for="numColors">몇 개의 색을 사용할까요?</label>
             <div class="input-wrapper">
-              <input type="number" id="numColors" min="1" max="10" placeholder="1-10 사이의 숫자를 입력하세요" />
+              <input type="number" id="numColors" min="1" max="2" placeholder="비트 수에 따라 자동 제한" />
               <button onclick="generatePalette()">팔레트 만들기</button>
             </div>
+            <div class="input-guide"><strong>※ 안내</strong> 비트 수에 따라 선택 가능한 색상 개수가 자동으로 제한됩니다.</div>
           </div>
         </div>
         <div id="paletteArea" class="color-options"></div>

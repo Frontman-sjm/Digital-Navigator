@@ -1,8 +1,31 @@
 let canvasRows = 10;
 let canvasCols = 10;
 
+// 비트 수에 따라 색상 개수 제한
+const bitCountSelect = document.getElementById('bitCount');
+const numColorsInput = document.getElementById('numColors');
+
+function updateNumColorsMax() {
+  const bits = parseInt(bitCountSelect.value);
+  const maxColors = Math.pow(2, bits);
+  numColorsInput.max = maxColors;
+  if (parseInt(numColorsInput.value) > maxColors) {
+    numColorsInput.value = maxColors;
+  }
+}
+
+bitCountSelect.addEventListener('change', updateNumColorsMax);
+numColorsInput.addEventListener('input', updateNumColorsMax);
+
+// 페이지 로드시 초기화
+updateNumColorsMax();
+
 function generatePalette() {
-  const num = parseInt(document.getElementById("numColors").value);
+  const bits = parseInt(bitCountSelect.value);
+  const maxColors = Math.pow(2, bits);
+  let num = parseInt(numColorsInput.value);
+  if (num > maxColors) num = maxColors;
+  numColorsInput.value = num;
   const area = document.getElementById("paletteArea");
   area.innerHTML = '';
 
