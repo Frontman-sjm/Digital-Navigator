@@ -255,9 +255,12 @@ async function handleAudioFile(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  // 파일 형식 검사
-  const validTypes = ['audio/wav', 'audio/mp3', 'audio/ogg'];
-  if (!validTypes.includes(file.type)) {
+  // 파일 형식 검사 (MIME + 확장자)
+  const validTypes = ['audio/wav', 'audio/mp3', 'audio/ogg', 'audio/mpeg'];
+  const validExts = ['.wav', '.mp3', '.ogg'];
+  const fileName = file.name.toLowerCase();
+  const hasValidExt = validExts.some(ext => fileName.endsWith(ext));
+  if (!validTypes.includes(file.type) && !hasValidExt) {
     alert('지원하지 않는 파일 형식입니다. WAV, MP3, OGG 파일만 업로드 가능합니다.');
     return;
   }
