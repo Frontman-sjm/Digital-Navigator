@@ -163,6 +163,12 @@
       color: #2c3e50;
       margin-bottom: 0.5rem;
     }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -187,19 +193,17 @@
         <div class="progress-bar"></div>
         <span class="progress-text">0%</span>
       </div>
-      <p class="file-info">지원 형식: WAV, MP3, OGG</p>
+      <p class="file-info">지원 형식: WAV, MP3, OGG, M4A</p>
     </section>
     <section class="step">
       <h2>1단계: 표본화 (Sampling)</h2>
       <p>소리는 연속적인 아날로그 파형이지만, 컴퓨터는 이를 일정 간격으로 나눠서 <strong>샘플링</strong>하여 디지털로 저장합니다.</p>
       <div class="controls">
-        <label for="sampleCount">샘플 개수:</label>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <input type="range" id="sampleCount" min="2" max="32" value="8">
-          <input type="number" id="sampleCountNum" min="2" max="32" value="8" style="width: 60px;">
+        <div class="control-group">
+          <label for="samplingRate">샘플링 주기 (Hz):</label>
+          <input type="range" id="samplingRate" min="100" max="44100" value="8000" step="100">
+          <input type="number" id="samplingRateNum" min="100" max="44100" value="8000" step="100">
         </div>
-        <label for="samplingRate" style="margin-top: 1rem;">샘플링 주기 (높을수록 더 자세한 파형):</label>
-        <input type="range" id="samplingRate" min="10" max="100" value="50">
       </div>
       <div class="canvas-container">
         <canvas id="samplingCanvas"></canvas>
@@ -207,10 +211,9 @@
     </section>
     <section class="step">
       <h2>2단계: 양자화 (Quantization)</h2>
-      <p>표본화된 각 점의 진폭을 이산적인 값으로 변환합니다.</p>
+      <p>표본화된 각 점의 진폭을 이산적인 값으로 변환합니다. CD 품질의 오디오는 16비트 양자화를 사용합니다.</p>
       <div class="controls">
-        <label for="quantizationBits">양자화 비트 수 (높을수록 더 정확한 표현):</label>
-        <input type="range" id="quantizationBits" min="4" max="16" value="8">
+        <p class="quantization-info">양자화 비트 수: 16비트 (CD 품질)</p>
       </div>
       <div class="canvas-container">
         <canvas id="quantizationCanvas"></canvas>
