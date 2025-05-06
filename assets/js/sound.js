@@ -20,7 +20,7 @@ function safeGetCanvasAndCtx(id) {
   return [canvas, ctx];
 }
 
-// 캔버스 및 컨텍스트 재정의 (기존 getCanvasAndCtx → safeGetCanvasAndCtx)
+// 캔버스 및 컨텍스트 재정의
 const [samplingCanvas, samplingCtx] = safeGetCanvasAndCtx('samplingCanvas');
 const [quantizationCanvas, quantizationCtx] = safeGetCanvasAndCtx('quantizationCanvas');
 const [encodingCanvas, encodingCtx] = safeGetCanvasAndCtx('encodingCanvas');
@@ -36,8 +36,11 @@ const stopBtn = document.getElementById('stopBtn');
 const volumeControl = document.getElementById('volume');
 const progressBar = document.querySelector('.progress-bar');
 const progressText = document.querySelector('.progress-text');
+const sampleCountInput = document.getElementById('sampleCount');
+const sampleCountNumInput = document.getElementById('sampleCountNum');
 
-// 오디오 컨텍스트 및 관련 변수
+// 전역 변수
+let sampleCount = 8;
 let audioContext;
 let originalBuffer;
 let processedBuffer;
@@ -72,18 +75,13 @@ function drawGuideMessage(ctx, canvas, message, example = false) {
 
 // 1단계: 샘플링 시각화 (오디오 데이터 기반)
 function drawSampling(samples = 50, audioData = null, isExample = false) {
-  if (!samplingCanvas || !samplingCtx) {
-    // 사용자 안내 메시지
-    if (samplingCanvas) {
-      samplingCanvas.width = samplingCanvas.width; // clear
-      const ctx = samplingCanvas.getContext('2d');
-      ctx.font = 'bold 20px Arial';
-      ctx.fillStyle = '#e74c3c';
-      ctx.textAlign = 'center';
-      ctx.fillText('샘플링 캔버스 오류', samplingCanvas.width / 2, samplingCanvas.height / 2);
-    }
-    return;
+  if (!samplingCanvas || !samplingCtx) return;
+  
+  // 캔버스 크기 확인 및 조정
+  if (samplingCanvas.width === 0 || samplingCanvas.height === 0) {
+    resizeCanvas(samplingCanvas);
   }
+  
   if (!audioData) {
     audioData = generateExampleSineData(44100, 2);
     isExample = true;
@@ -122,9 +120,13 @@ function drawSampling(samples = 50, audioData = null, isExample = false) {
   samplingCtx.strokeStyle = '#ff5500';
   samplingCtx.lineWidth = 2;
   samplingCtx.stroke();
-  samplingCtx.font = 'bold 14px Arial';
+  
+  // 샘플링된 값 표시 개선
+  const fontSize = Math.min(16, Math.max(10, 200 / sampleCount)); // 샘플 개수에 따라 폰트 크기 조절
+  samplingCtx.font = `bold ${fontSize}px Arial`;
   samplingCtx.textAlign = 'center';
   samplingCtx.textBaseline = 'bottom';
+  
   for (let i = 0; i < sampleValues.length; i++) {
     const { x, y, value } = sampleValues[i];
     samplingCtx.beginPath();
@@ -137,8 +139,14 @@ function drawSampling(samples = 50, audioData = null, isExample = false) {
 }
 
 // 2단계: 양자화 시각화 (오디오 데이터 기반)
-function drawQuantization(bits = 8, audioData = null, isExample = false) {
+function drawQuantization(bits = 8, audioData = null, isExample = false, sampleCount = 8) {
   if (!quantizationCanvas || !quantizationCtx) return;
+  
+  // 캔버스 크기 확인 및 조정
+  if (quantizationCanvas.width === 0 || quantizationCanvas.height === 0) {
+    resizeCanvas(quantizationCanvas);
+  }
+  
   if (!audioData) {
     audioData = generateExampleSineData(44100, 2);
     isExample = true;
@@ -158,7 +166,7 @@ function drawQuantization(bits = 8, audioData = null, isExample = false) {
     quantizationCtx.textAlign = 'center';
     quantizationCtx.fillText('예시 파형입니다. 오디오 파일을 첨부하면 실제 데이터로 바뀝니다.', quantizationCanvas.width / 2, 30);
   }
-  const samples = 50;
+  const samples = sampleCount;
   const step = Math.max(1, Math.floor(audioData.length / samples));
   const levels = Math.pow(2, bits);
   const quantStep = 2 / (levels - 1);
@@ -191,8 +199,14 @@ function drawQuantization(bits = 8, audioData = null, isExample = false) {
 }
 
 // 3단계: 부호화 시각화 (오디오 데이터 기반)
-function drawEncoding(bits = 8, audioData = null, isExample = false) {
+function drawEncoding(bits = 8, audioData = null, isExample = false, sampleCount = 8) {
   if (!encodingCanvas || !encodingCtx) return;
+  
+  // 캔버스 크기 확인 및 조정
+  if (encodingCanvas.width === 0 || encodingCanvas.height === 0) {
+    resizeCanvas(encodingCanvas);
+  }
+  
   if (!audioData) {
     audioData = generateExampleSineData(44100, 2);
     isExample = true;
@@ -212,7 +226,7 @@ function drawEncoding(bits = 8, audioData = null, isExample = false) {
     encodingCtx.textAlign = 'center';
     encodingCtx.fillText('예시 파형입니다. 오디오 파일을 첨부하면 실제 데이터로 바뀝니다.', encodingCanvas.width / 2, 30);
   }
-  const samples = 16;
+  const samples = sampleCount;
   const step = Math.max(1, Math.floor(audioData.length / samples));
   const levels = Math.pow(2, bits);
   let binaryArr = [];
@@ -223,31 +237,37 @@ function drawEncoding(bits = 8, audioData = null, isExample = false) {
     const bin = quantized.toString(2).padStart(bits, '0');
     binaryArr.push(bin);
   }
-  // 이진수 나열 시각화
-  encodingCtx.font = 'bold 18px Consolas, monospace';
+  
+  // 이진수 나열 시각화 (한 줄에 표시)
+  const totalWidth = encodingCanvas.width;
+  const spacing = totalWidth / (samples * 2); // 각 이진수 사이의 간격
+  const startX = spacing; // 첫 번째 이진수의 시작 위치
+  
+  encodingCtx.font = 'bold 14px Consolas, monospace';
   encodingCtx.textAlign = 'center';
   encodingCtx.textBaseline = 'middle';
+  encodingCtx.fillStyle = '#1976D2';
+  
   for (let i = 0; i < binaryArr.length; i++) {
-    const x = ((i + 0.5) / binaryArr.length) * encodingCanvas.width;
+    const x = startX + (i * spacing * 2);
     const y = encodingCanvas.height / 2;
-    encodingCtx.fillStyle = '#1976D2';
     encodingCtx.fillText(binaryArr[i], x, y);
   }
 }
 
 // 파일 첨부 전 초기화(예시 데이터로 시각화)
 function drawAllGuides() {
-  drawSampling(samplingRateInput.value, null, true);
-  drawQuantization(quantizationBitsInput.value, null, true);
-  drawEncoding(quantizationBitsInput.value, null, true);
+  drawSampling(sampleCount, null, true);
+  drawQuantization(quantizationBitsInput.value, null, true, sampleCount);
+  drawEncoding(quantizationBitsInput.value, null, true, sampleCount);
 }
 
 // 파일 첨부 시 단계별 시각화
 function visualizeAll(audioBuffer) {
   const channelData = audioBuffer.getChannelData(0);
-  drawSampling(samplingRateInput.value, channelData, false);
-  drawQuantization(quantizationBitsInput.value, channelData, false);
-  drawEncoding(quantizationBitsInput.value, channelData, false);
+  drawSampling(sampleCount, channelData, false);
+  drawQuantization(quantizationBitsInput.value, channelData, false, sampleCount);
+  drawEncoding(quantizationBitsInput.value, channelData, false, sampleCount);
 }
 
 // 파일 첨부 이벤트 핸들러 수정
@@ -336,39 +356,147 @@ function updateQualityMetrics() {
   `;
 }
 
-// 샘플링/양자화 슬라이더 변경 시에도 단계별 시각화
-samplingRateInput.addEventListener('input', () => {
+// 캔버스 크기 조정 함수
+function resizeCanvas(canvas) {
+  if (!canvas) return;
+  
+  const container = canvas.parentElement;
+  if (!container) return;
+  
+  const containerWidth = container.clientWidth;
+  const padding = 30;
+  const scrollbarWidth = 8;
+  const availableWidth = containerWidth - (padding * 2) - scrollbarWidth;
+  
+  canvas.width = Math.max(availableWidth, 300);
+  canvas.height = 200;
+}
+
+// 윈도우 리사이즈 이벤트 핸들러
+function handleResize() {
+  resizeCanvas(samplingCanvas);
+  resizeCanvas(quantizationCanvas);
+  resizeCanvas(encodingCanvas);
+  
   if (originalBuffer) {
     visualizeAll(originalBuffer);
-    processAudio(originalBuffer);
-    updateQualityMetrics();
   } else {
     drawAllGuides();
   }
-});
-quantizationBitsInput.addEventListener('input', () => {
-  if (originalBuffer) {
-    visualizeAll(originalBuffer);
-    processAudio(originalBuffer);
-    updateQualityMetrics();
-  } else {
-    drawAllGuides();
-  }
-});
+}
 
-audioFileInput.addEventListener('change', handleAudioFile);
-
-playOriginalBtn.addEventListener('click', () => {
-  if (originalBuffer) {
-    playAudio(originalBuffer);
+// 이벤트 리스너 설정
+function setupEventListeners() {
+  if (samplingRateInput) {
+    samplingRateInput.addEventListener('input', () => {
+      if (originalBuffer) {
+        visualizeAll(originalBuffer);
+        processAudio(originalBuffer);
+        updateQualityMetrics();
+      } else {
+        drawAllGuides();
+      }
+    });
   }
-});
-
-playProcessedBtn.addEventListener('click', () => {
-  if (processedBuffer) {
-    playAudio(processedBuffer);
+  
+  if (quantizationBitsInput) {
+    quantizationBitsInput.addEventListener('input', () => {
+      if (originalBuffer) {
+        visualizeAll(originalBuffer);
+        processAudio(originalBuffer);
+        updateQualityMetrics();
+      } else {
+        drawAllGuides();
+      }
+    });
   }
-});
+  
+  if (sampleCountInput && sampleCountNumInput) {
+    sampleCountInput.addEventListener('input', (e) => {
+      sampleCount = parseInt(e.target.value);
+      sampleCountNumInput.value = sampleCount;
+      if (originalBuffer) {
+        visualizeAll(originalBuffer);
+        processAudio(originalBuffer);
+        updateQualityMetrics();
+      } else {
+        drawAllGuides();
+      }
+    });
+    
+    sampleCountNumInput.addEventListener('input', (e) => {
+      sampleCount = parseInt(e.target.value);
+      sampleCountInput.value = sampleCount;
+      if (originalBuffer) {
+        visualizeAll(originalBuffer);
+        processAudio(originalBuffer);
+        updateQualityMetrics();
+      } else {
+        drawAllGuides();
+      }
+    });
+  }
+  
+  if (audioFileInput) {
+    audioFileInput.addEventListener('change', handleAudioFile);
+  }
+  
+  if (playOriginalBtn) {
+    playOriginalBtn.addEventListener('click', () => {
+      if (originalBuffer) {
+        playAudio(originalBuffer);
+      }
+    });
+  }
+  
+  if (playProcessedBtn) {
+    playProcessedBtn.addEventListener('click', () => {
+      if (processedBuffer) {
+        playAudio(processedBuffer);
+      }
+    });
+  }
+  
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', pauseAudio);
+  }
+  
+  if (stopBtn) {
+    stopBtn.addEventListener('click', stopAudio);
+  }
+  
+  if (volumeControl) {
+    volumeControl.addEventListener('input', () => {
+      if (gainNode) {
+        gainNode.gain.value = volumeControl.value / 100;
+      }
+    });
+  }
+  
+  window.addEventListener('resize', () => {
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(handleResize, 250);
+  });
+}
+
+// 초기화
+function initialize() {
+  // 캔버스 크기 초기화
+  handleResize();
+  
+  // 초기 가이드 표시
+  drawAllGuides();
+  
+  // 이벤트 리스너 설정
+  setupEventListeners();
+}
+
+// 페이지 로드 시 초기화
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
 
 function playAudio(buffer) {
   if (audioSource) {
@@ -415,18 +543,4 @@ function stopAudio() {
     playOriginalBtn.disabled = false;
     playProcessedBtn.disabled = false;
   }
-}
-
-// 이벤트 리스너 추가
-pauseBtn.addEventListener('click', pauseAudio);
-stopBtn.addEventListener('click', stopAudio);
-volumeControl.addEventListener('input', () => {
-  if (gainNode) {
-    gainNode.gain.value = volumeControl.value / 100;
-  }
-});
-
-// window.onload에서 drawAllGuides 호출 (엔터프라이즈 신뢰성)
-window.onload = function() {
-  drawAllGuides();
-}; 
+} 
