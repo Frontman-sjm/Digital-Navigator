@@ -3037,3 +3037,81 @@ canvas {
     padding: 1rem;
   }
 }
+
+/* 동영상 프레임 애니메이션 스타일 */
+.video-frame-controls {
+  margin-bottom: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.05);
+}
+.frame-thumbnails {
+  display: flex;
+  gap: 0.7rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.frame-thumbnails img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+  background: #fff;
+}
+.frame-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+.frame-player-controls button {
+  padding: 0.6rem 1.5rem;
+  background: linear-gradient(135deg, #3498db, #2ecc71);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.frame-player-controls button:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+}
+.frame-player-controls label {
+  font-size: 1.05rem;
+  color: #2c3e50;
+}
+#frameSpeed {
+  width: 120px;
+  margin-left: 0.5rem;
+}
+.frame-canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+#frameCanvas {
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(52,152,219,0.08);
+  border: 1px solid #e0e0e0;
+}
+@media (max-width: 768px) {
+  .frame-thumbnails img {
+    width: 40px;
+    height: 40px;
+  }
+  .frame-canvas-container {
+    margin: 1rem 0;
+  }
+  #frameCanvas {
+    width: 100% !important;
+    height: 200px !important;
+  }
+}

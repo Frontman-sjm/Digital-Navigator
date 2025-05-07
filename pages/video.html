@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>동영상의 디지털 표현</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>동영상의 디지털 표현</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">홈</a></li>
+        <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="text.html">문자의 디지털 표현</a></li>
+        <li><a href="image.html">그림의 디지털 표현</a></li>
+        <li><a href="sound.html">소리의 디지털 표현</a></li>
+        <li><a href="video.html">동영상의 디지털 표현</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>동영상의 디지털 표현이란?</h2>
+      <p>
+        동영상은 연속된 이미지(프레임)와 소리(오디오)가 결합된 디지털 미디어입니다.<br>
+        동영상의 디지털 표현은 각 프레임을 이미지로 샘플링하고, 압축 및 코덱을 통해 저장/전송합니다.<br>
+        아래에서 동영상의 디지털화 과정을 시각적으로 살펴보세요.
+      </p>
+    </section>
+    <section>
+      <h2>프레임 애니메이션 체험</h2>
+      <div class="video-frame-controls">
+        <label for="frameFiles"><strong>프레임 이미지 업로드 (최대 20장):</strong></label>
+        <input type="file" id="frameFiles" accept="image/*" multiple />
+        <div class="frame-thumbnails" id="frameThumbnails"></div>
+        <div class="frame-player-controls">
+          <button id="playBtn">재생</button>
+          <button id="pauseBtn" disabled>일시정지</button>
+          <label for="frameSpeed">프레임 속도: <span id="frameSpeedValue">5</span> fps</label>
+          <input type="range" id="frameSpeed" min="1" max="20" value="5" />
+        </div>
+      </div>
+      <div class="frame-canvas-container">
+        <canvas id="frameCanvas" width="400" height="400" style="background:#f8f9fa;border-radius:12px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
+      </div>
+      <div class="input-guide" style="margin-top:1rem;">
+        여러 장의 이미지를 업로드한 뒤, 재생 버튼을 눌러보세요!<br>
+        프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.
+      </div>
+    </section>
+  </main>
+  <script src="../assets/js/video.js"></script>
+</body>
+</html> 
