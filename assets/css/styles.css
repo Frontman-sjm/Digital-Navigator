@@ -2613,3 +2613,283 @@ canvas {
     margin: 0.2rem 0;
   }
 }
+
+/* 빙고 게임 스타일 */
+.bingo-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.bingo-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.size-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.size-controls label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.size-controls input[type="number"] {
+  width: 60px;
+  padding: 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.size-controls button {
+  padding: 0.5rem 1.5rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.size-controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.game-stats {
+  display: flex;
+  gap: 2rem;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.game-stats span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bingo-board {
+  display: grid;
+  gap: 10px;
+  margin: 2rem 0;
+  justify-content: center;
+}
+
+.bingo-cell {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bingo-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bingo-cell.selected {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border-color: #2980b9;
+}
+
+.bingo-cell .char {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.bingo-cell .ascii {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.bingo-cell.selected .ascii {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bingo-result {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.result-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.result-content h3 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.result-content p {
+  font-size: 1.2rem;
+  color: #34495e;
+  margin-bottom: 2rem;
+}
+
+.result-content button {
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.result-content button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+@media (max-width: 768px) {
+  .bingo-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .size-controls {
+    justify-content: center;
+  }
+
+  .game-stats {
+    justify-content: center;
+  }
+
+  .bingo-cell {
+    width: 60px;
+    height: 60px;
+  }
+
+  .bingo-cell .char {
+    font-size: 1.2rem;
+  }
+
+  .bingo-cell .ascii {
+    font-size: 0.7rem;
+  }
+}
+
+/* 게임 규칙 스타일 */
+.game-rules {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.game-rules h3 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid rgba(52, 152, 219, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.game-rules h3::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233498db'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.game-rules ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.game-rules li {
+  padding: 0.8rem 1rem;
+  margin: 0.5rem 0;
+  background: white;
+  border-radius: 8px;
+  color: #34495e;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  border: 1px solid rgba(52, 152, 219, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.game-rules li:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.game-rules li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #3498db, #2ecc71);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .game-rules {
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .game-rules h3 {
+    font-size: 1.2rem;
+  }
+
+  .game-rules li {
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+  }
+}

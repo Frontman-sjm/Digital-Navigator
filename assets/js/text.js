@@ -18,14 +18,14 @@ function convertToASCIIAndUnicode() {
     const code = char.charCodeAt(0);
     const asciiValue = code <= 127 ? code : '지원 안 함';
     const unicodeValue = 'U+' + code.toString(16).toUpperCase().padStart(4, '0');
-    
+
     asciiHTML += `
       <li>
         <strong>${char}</strong>: ${asciiValue}
         ${code > 127 ? '<span class="warning">(ASCII는 영문자, 숫자, 특수문자만 지원)</span>' : ''}
       </li>`;
     unicodeHTML += `<li><strong>${char}</strong>: ${unicodeValue}</li>`;
-    
+
     if (code <= 127) {
       hasASCII = true;
     }
@@ -84,7 +84,7 @@ function convertBinaryToChar() {
 
   // 공백으로 구분된 이진수들을 배열로 변환
   const binaryChunks = binaryInput.split(/\s+/).filter(chunk => chunk.length > 0);
-  
+
   // 띄어쓰기 검사
   if (binaryChunks.length === 1 && binaryInput.length > 8) {
     resultDiv.innerHTML = `
@@ -120,9 +120,9 @@ function convertBinaryToChar() {
     resultDiv.innerHTML = `
       <p class="error">
         잘못된 이진코드가 있습니다:<br>
-        ${invalidChunks.map(chunk => 
-          `${chunk} (${chunk.length}비트${chunk.length === 8 ? ', ASCII 범위 초과' : ''})`
-        ).join('<br>')}
+        ${invalidChunks.map(chunk =>
+      `${chunk} (${chunk.length}비트${chunk.length === 8 ? ', ASCII 범위 초과' : ''})`
+    ).join('<br>')}
       </p>`;
     return;
   }
@@ -145,7 +145,182 @@ function convertBinaryToChar() {
   `;
 }
 
-// 페이지 로드 시 ASCII 코드 표 생성
-window.onload = function() {
-  // ASCII 코드 표 생성 코드 완전 삭제
+// 빙고 게임 클래스 정의
+class BingoGame {
+  constructor() {
+    this.boardCount = 0;
+    this.bingoCount = 0;
+    this.selectedCells = new Set();
+    this.currentBoard = [];
+    this.isInitialized = false;
+
+    // DOM 요소 캐싱
+    this.elements = {
+      board: document.getElementById('bingoBoard'),
+      boardCount: document.getElementById('boardCount'),
+      bingoCount: document.getElementById('bingoCount'),
+      createButton: document.getElementById('createBoardBtn'),
+      rowsInput: document.getElementById('bingoRows'),
+      colsInput: document.getElementById('bingoCols'),
+      resultDiv: document.getElementById('bingoResult')
+    };
+
+    // 이벤트 바인딩
+    this.boundCreateBoard = this.createBoard.bind(this);
+    this.boundResetGame = this.resetGame.bind(this);
+  }
+
+  initialize() {
+    if (this.isInitialized) return;
+
+    // 이벤트 리스너 등록
+    this.elements.createButton.addEventListener('click', this.boundCreateBoard);
+    document.getElementById('resetGameBtn')?.addEventListener('click', this.boundResetGame);
+
+    this.isInitialized = true;
+  }
+
+  createBoard() {
+    const rows = parseInt(this.elements.rowsInput.value);
+    const cols = parseInt(this.elements.colsInput.value);
+
+    if (!this.validateBoardSize(rows, cols)) {
+      return;
+    }
+
+    this.boardCount++;
+    this.updateBoardCount();
+    this.resetBoard();
+    this.generateBoard(rows, cols);
+  }
+
+  validateBoardSize(rows, cols) {
+    if (rows < 3 || rows > 10 || cols < 3 || cols > 10) {
+      alert('행과 열은 3에서 10 사이의 값이어야 합니다.');
+      return false;
+    }
+    return true;
+  }
+
+  updateBoardCount() {
+    this.elements.boardCount.textContent = this.boardCount;
+  }
+
+  resetBoard() {
+    this.elements.board.innerHTML = '';
+    this.selectedCells.clear();
+    this.bingoCount = 0;
+    this.elements.bingoCount.textContent = this.bingoCount;
+    this.currentBoard = [];
+  }
+
+  generateBoard(rows, cols) {
+    const usedChars = new Set();
+    this.elements.board.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+
+    for (let i = 0; i < rows; i++) {
+      const row = [];
+      for (let j = 0; j < cols; j++) {
+        const char = this.generateUniqueChar(usedChars);
+        row.push(char);
+        this.createCell(char, i, j);
+      }
+      this.currentBoard.push(row);
+    }
+  }
+
+  generateUniqueChar(usedChars) {
+    let char;
+    do {
+      const code = Math.floor(Math.random() * (126 - 32 + 1)) + 32;
+      char = String.fromCharCode(code);
+    } while (usedChars.has(char));
+    usedChars.add(char);
+    return char;
+  }
+
+  createCell(char, row, col) {
+    const cell = document.createElement('div');
+    cell.className = 'bingo-cell';
+    cell.innerHTML = `
+      <div class="char">${char}</div>
+      <div class="ascii">${char.charCodeAt(0)}</div>
+    `;
+    cell.addEventListener('click', () => this.toggleCell(cell, row, col));
+    this.elements.board.appendChild(cell);
+  }
+
+  toggleCell(cell, row, col) {
+    const cellKey = `${row},${col}`;
+    if (this.selectedCells.has(cellKey)) {
+      cell.classList.remove('selected');
+      this.selectedCells.delete(cellKey);
+    } else {
+      cell.classList.add('selected');
+      this.selectedCells.add(cellKey);
+    }
+    this.checkBingo();
+  }
+
+  checkBingo() {
+    const rows = this.currentBoard.length;
+    const cols = this.currentBoard[0].length;
+    let newBingoCount = 0;
+
+    // 가로 빙고 체크
+    for (let i = 0; i < rows; i++) {
+      if (this.isLineComplete(i, 0, 0, 1)) newBingoCount++;
+    }
+
+    // 세로 빙고 체크
+    for (let j = 0; j < cols; j++) {
+      if (this.isLineComplete(0, j, 1, 0)) newBingoCount++;
+    }
+
+    // 대각선 빙고 체크 (정사각형인 경우에만)
+    if (rows === cols) {
+      if (this.isLineComplete(0, 0, 1, 1)) newBingoCount++;
+      if (this.isLineComplete(0, cols - 1, 1, -1)) newBingoCount++;
+    }
+
+    this.updateBingoCount(newBingoCount);
+  }
+
+  isLineComplete(startRow, startCol, rowStep, colStep) {
+    const rows = this.currentBoard.length;
+    const cols = this.currentBoard[0].length;
+
+    for (let i = 0; i < rows; i++) {
+      const row = startRow + i * rowStep;
+      const col = startCol + i * colStep;
+
+      if (row >= rows || col >= cols || row < 0 || col < 0) return false;
+      if (!this.selectedCells.has(`${row},${col}`)) return false;
+    }
+    return true;
+  }
+
+  updateBingoCount(newCount) {
+    this.bingoCount = newCount;
+    this.elements.bingoCount.textContent = this.bingoCount;
+
+    if (this.bingoCount >= 3) {
+      this.showGameResult();
+    }
+  }
+
+  showGameResult() {
+    this.elements.resultDiv.style.display = 'flex';
+  }
+
+  resetGame() {
+    this.elements.resultDiv.style.display = 'none';
+    this.createBoard();
+  }
+}
+
+// 페이지 로드 시 게임 초기화
+window.onload = function () {
+  const game = new BingoGame();
+  game.initialize();
 }; 

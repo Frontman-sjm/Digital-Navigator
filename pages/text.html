@@ -102,6 +102,48 @@
         <div id="binaryResult"></div>
       </div>
     </section>
+
+    <section>
+      <h2>ASCII 빙고 게임</h2>
+      <p>ASCII 문자를 이용한 빙고 게임을 즐겨보세요!</p>
+      <div class="bingo-container">
+        <div class="game-rules">
+          <h3>게임 규칙</h3>
+          <ul>
+            <li>빙고판의 크기는 3x3부터 10x10까지 선택할 수 있습니다.</li>
+            <li>각 칸에는 ASCII 문자와 해당 문자의 ASCII 코드 값이 표시됩니다.</li>
+            <li>같은 문자는 중복되어 나타나지 않습니다 (대소문자 구분).</li>
+            <li>칸을 클릭하여 선택/해제할 수 있습니다.</li>
+            <li>가로, 세로, 대각선으로 한 줄이 완성되면 빙고가 됩니다.</li>
+            <li>3개의 빙고를 완성하면 게임이 종료됩니다.</li>
+            <li>빙고판 생성 횟수는 기록되어 부정행위를 방지합니다.</li>
+          </ul>
+        </div>
+        <div class="bingo-controls">
+          <div class="size-controls">
+            <label for="bingoRows">행:</label>
+            <input type="number" id="bingoRows" min="3" max="10" value="5">
+            <label for="bingoCols">열:</label>
+            <input type="number" id="bingoCols" min="3" max="10" value="5">
+            <button onclick="createBingoBoard()" id="createBoardBtn">빙고판 생성</button>
+          </div>
+          <div class="game-stats">
+            <span>생성 횟수: <span id="boardCount">0</span>회</span>
+            <span>현재 빙고: <span id="bingoCount">0</span>개</span>
+          </div>
+        </div>
+        
+        <div class="bingo-board" id="bingoBoard"></div>
+        
+        <div class="bingo-result" id="bingoResult" style="display: none;">
+          <div class="result-content">
+            <h3>축하합니다!</h3>
+            <p>3빙고를 달성하셨습니다!</p>
+            <button onclick="resetBingoGame()">게임 재시작</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script src="../assets/js/text.js"></script>
