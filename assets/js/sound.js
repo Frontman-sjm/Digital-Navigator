@@ -272,159 +272,259 @@ function updateQualityMetrics(originalBuffer, processedBuffer) {
   `;
 }
 
-// 파일 첨부 이벤트 핸들러
-async function handleAudioFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const validTypes = ['audio/wav', 'audio/mp3', 'audio/ogg', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a'];
-  const validExts = ['.wav', '.mp3', '.ogg', '.m4a'];
-  const fileName = file.name.toLowerCase();
-  const hasValidExt = validExts.some(ext => fileName.endsWith(ext));
-  
-  if (!validTypes.includes(file.type) && !hasValidExt) {
-    alert('지원하지 않는 파일 형식입니다. WAV, MP3, OGG 파일만 업로드 가능합니다.');
-    return;
-  }
-
-  if (progressBar) progressBar.style.width = '0%';
-  if (progressText) progressText.textContent = '0%';
-
-  if (!audioContext) {
-    try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      gainNode = audioContext.createGain();
-      gainNode.connect(audioContext.destination);
-    } catch (error) {
-      console.error('오디오 컨텍스트 초기화 실패:', error);
-      alert('오디오 컨텍스트 초기화에 실패했습니다. 브라우저를 확인해주세요.');
-      return;
-    }
-  }
-
+// 오디오 컨텍스트 초기화 함수 개선
+async function initializeAudioContext() {
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    if (progressBar) progressBar.style.width = '50%';
-    if (progressText) progressText.textContent = '50%';
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)({
+        latencyHint: 'interactive'
+      });
+    }
     
-    originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    if (progressBar) progressBar.style.width = '100%';
-    if (progressText) progressText.textContent = '100%';
+    // 오디오 컨텍스트가 일시 중지된 상태라면 재개
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
     
-    processAudio(originalBuffer);
-    visualizeAll(originalBuffer);
-    
-    if (playOriginalBtn) playOriginalBtn.disabled = false;
-    if (playProcessedBtn) playProcessedBtn.disabled = false;
+    return audioContext;
   } catch (error) {
-    console.error('오디오 파일 처리 중 오류 발생:', error);
-    alert('오디오 파일 처리 중 오류가 발생했습니다. 다른 파일을 시도해주세요.');
+    console.error('오디오 컨텍스트 초기화 실패:', error);
+    throw new Error('오디오 시스템을 초기화할 수 없습니다. 브라우저가 Web Audio API를 지원하는지 확인해주세요.');
   }
 }
 
-// 오디오 처리
-function processAudio(buffer) {
-  if (!buffer) return;
-  
-  const processedData = new Float32Array(buffer.length);
-  const levels = 16; // 4비트 양자화
-  const sampleInterval = Math.floor(44100 / sampleRate);
-  
-  for (let i = 0; i < buffer.length; i += sampleInterval) {
-    const value = buffer.getChannelData(0)[i];
-    const quantized = Math.round((value + 1) / 2 * (levels - 1));
-    processedData[i] = (quantized / (levels - 1)) * 2 - 1;
+// 오디오 소스 정리 함수
+function cleanupAudioSource() {
+  if (audioSource) {
+    try {
+      audioSource.stop();
+      audioSource.disconnect();
+    } catch (error) {
+      console.warn('오디오 소스 정리 중 오류:', error);
+    }
+    audioSource = null;
   }
   
-  if (audioContext) {
-    processedBuffer = audioContext.createBuffer(
+  if (gainNode) {
+    try {
+      gainNode.disconnect();
+    } catch (error) {
+      console.warn('게인 노드 정리 중 오류:', error);
+    }
+    gainNode = null;
+  }
+}
+
+// 오디오 파일 처리 함수 개선
+async function handleAudioFile(e) {
+  try {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 진행 상태 표시
+    updateProgress(0);
+    
+    // 오디오 컨텍스트가 없거나 일시 중지된 상태라면 초기화
+    if (!audioContext || audioContext.state === 'suspended') {
+      await initializeAudioContext();
+    }
+    
+    // 이전 오디오 소스 정리
+    cleanupAudioSource();
+    
+    // 파일 읽기
+    const arrayBuffer = await file.arrayBuffer();
+    updateProgress(50);
+    
+    // 오디오 디코딩
+    originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    updateProgress(100);
+    
+    // 처리된 오디오 생성
+    processedBuffer = processAudio(originalBuffer);
+    
+    // 시각화 업데이트
+    visualizeAll(originalBuffer);
+    
+    // 음질 지표 업데이트
+    updateQualityMetrics(originalBuffer, processedBuffer);
+    
+    // 컨트롤 활성화
+    enableControls(true);
+    
+  } catch (error) {
+    console.error('오디오 파일 처리 중 오류:', error);
+    alert('오디오 파일을 처리하는 중 오류가 발생했습니다. 다른 파일을 시도해주세요.');
+    enableControls(false);
+  }
+}
+
+// 오디오 처리 함수 개선
+function processAudio(buffer) {
+  if (!buffer || !audioContext) return null;
+  
+  try {
+    // 새로운 오디오 버퍼 생성
+    const processedBuffer = audioContext.createBuffer(
       buffer.numberOfChannels,
       buffer.length,
       buffer.sampleRate
     );
-    processedBuffer.copyToChannel(processedData, 0);
-    updateQualityMetrics(buffer, processedBuffer);
+    
+    // 각 채널 처리
+    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+      const inputData = buffer.getChannelData(channel);
+      const outputData = processedBuffer.getChannelData(channel);
+      
+      // 샘플링 레이트에 따른 처리
+      const sampleInterval = Math.max(1, Math.floor(buffer.sampleRate / sampleRate));
+      
+      // 워크렛 크기 계산 (성능 최적화)
+      const workletSize = 4096;
+      
+      for (let i = 0; i < inputData.length; i += workletSize) {
+        const end = Math.min(i + workletSize, inputData.length);
+        
+        for (let j = i; j < end; j++) {
+          if (j % sampleInterval === 0) {
+            // 양자화 (16비트)
+            const quantized = Math.round(inputData[j] * 32767) / 32767;
+            outputData[j] = quantized;
+          } else {
+            // 보간 처리
+            const prevSample = Math.floor(j / sampleInterval) * sampleInterval;
+            const nextSample = Math.min(prevSample + sampleInterval, inputData.length - 1);
+            const fraction = (j - prevSample) / sampleInterval;
+            
+            outputData[j] = inputData[prevSample] * (1 - fraction) + 
+                          inputData[nextSample] * fraction;
+          }
+        }
+      }
+    }
+    
+    return processedBuffer;
+  } catch (error) {
+    console.error('오디오 처리 중 오류:', error);
+    return null;
   }
 }
 
-// 캔버스 크기 조정
+// 캔버스 크기 조정 함수 개선
 function resizeCanvas(canvas) {
   if (!canvas) return;
   
   const container = canvas.parentElement;
   if (!container) return;
   
+  // 컨테이너의 실제 크기 계산
   const containerWidth = container.clientWidth;
-  const padding = 30;
-  const scrollbarWidth = 8;
-  const availableWidth = containerWidth - (padding * 2) - scrollbarWidth;
+  const containerHeight = container.clientHeight;
   
-  canvas.width = Math.max(availableWidth, 300);
-  canvas.height = 200;
+  // 캔버스 크기 설정
+  canvas.width = containerWidth;
+  canvas.height = containerHeight;
+  
+  // 디스플레이 비율 조정
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = `${containerWidth}px`;
+  canvas.style.height = `${containerHeight}px`;
+  canvas.width = containerWidth * dpr;
+  canvas.height = containerHeight * dpr;
+  
+  // 컨텍스트 스케일 조정
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.scale(dpr, dpr);
+  }
+  
+  return canvas;
 }
 
-// 윈도우 리사이즈 핸들러
+// 리사이즈 이벤트 핸들러 개선
 function handleResize() {
-  resizeCanvas(samplingCanvas);
-  resizeCanvas(quantizationCanvas);
+  const canvases = [
+    samplingCanvas,
+    quantizationCanvas,
+    document.getElementById('encodingCanvas')
+  ];
   
-  if (originalBuffer) {
-    visualizeAll(originalBuffer);
-  } else {
-    drawAllGuides();
-  }
+  canvases.forEach(canvas => {
+    if (canvas) {
+      resizeCanvas(canvas);
+      // 현재 데이터로 다시 그리기
+      if (originalBuffer) {
+        const channelData = originalBuffer.getChannelData(0);
+        if (canvas.id === 'samplingCanvas') {
+          drawSampling(channelData, false);
+        } else if (canvas.id === 'quantizationCanvas') {
+          drawQuantization(channelData, false);
+        } else if (canvas.id === 'encodingCanvas') {
+          drawEncoding(channelData, false);
+        }
+      }
+    }
+  });
 }
 
-// 이벤트 리스너 설정
-function setupEventListeners() {
-  if (sampleRateInput && sampleRateNumInput) {
-    const updateSampling = () => {
-      const newRate = parseFloat(sampleRateInput.value);
-      if (!isNaN(newRate) && newRate >= 100 && newRate <= 44100) {
-        sampleRate = newRate;
-        sampleRateNumInput.value = sampleRate;
-        if (originalBuffer) {
-          visualizeAll(originalBuffer);
-          processAudio(originalBuffer);
-        } else {
-          drawAllGuides();
-        }
-      }
+// 디바운스 함수 추가
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
     };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
-    sampleRateInput.addEventListener('input', updateSampling);
-    sampleRateNumInput.addEventListener('input', () => {
-      const newRate = parseFloat(sampleRateNumInput.value);
-      if (!isNaN(newRate) && newRate >= 100 && newRate <= 44100) {
-        sampleRate = newRate;
-        sampleRateInput.value = sampleRate;
-        if (originalBuffer) {
-          visualizeAll(originalBuffer);
-          processAudio(originalBuffer);
-        } else {
-          drawAllGuides();
-        }
-      }
-    });
-  }
-  
+// 리사이즈 이벤트 리스너 설정
+const debouncedResize = debounce(handleResize, 250);
+window.addEventListener('resize', debouncedResize);
+
+// 이벤트 리스너 설정 함수 개선
+function setupEventListeners() {
+  // 파일 업로드 이벤트
   if (audioFileInput) {
     audioFileInput.addEventListener('change', handleAudioFile);
   }
   
+  // 샘플링 레이트 조절 이벤트
+  if (sampleRateInput && sampleRateNumInput) {
+    const updateSampling = () => {
+      const value = parseInt(sampleRateInput.value);
+      sampleRate = value;
+      sampleRateNumInput.value = value;
+      
+      if (originalBuffer) {
+        processedBuffer = processAudio(originalBuffer);
+        visualizeAll(originalBuffer);
+        updateQualityMetrics(originalBuffer, processedBuffer);
+      }
+    };
+    
+    sampleRateInput.addEventListener('input', updateSampling);
+    sampleRateNumInput.addEventListener('change', () => {
+      const value = parseInt(sampleRateNumInput.value);
+      if (value >= 100 && value <= 44100) {
+        sampleRateInput.value = value;
+        updateSampling();
+      }
+    });
+  }
+  
+  // 재생 컨트롤 이벤트
   if (playOriginalBtn) {
     playOriginalBtn.addEventListener('click', () => {
-      if (originalBuffer) {
-        playAudio(originalBuffer);
-      }
+      if (originalBuffer) playAudio(originalBuffer);
     });
   }
   
   if (playProcessedBtn) {
     playProcessedBtn.addEventListener('click', () => {
-      if (processedBuffer) {
-        playAudio(processedBuffer);
-      }
+      if (processedBuffer) playAudio(processedBuffer);
     });
   }
   
@@ -436,6 +536,7 @@ function setupEventListeners() {
     stopBtn.addEventListener('click', stopAudio);
   }
   
+  // 볼륨 컨트롤 이벤트
   if (volumeControl) {
     volumeControl.addEventListener('input', () => {
       if (gainNode) {
@@ -444,45 +545,127 @@ function setupEventListeners() {
     });
   }
   
-  window.addEventListener('resize', () => {
-    clearTimeout(window.resizeTimer);
-    window.resizeTimer = setTimeout(handleResize, 250);
+  // 페이지 언로드 이벤트
+  window.addEventListener('beforeunload', () => {
+    cleanupAudioSource();
+    if (audioContext) {
+      audioContext.close();
+    }
   });
 }
 
-// 초기화
-function initialize() {
-  handleResize();
-  drawAllGuides();
-  setupEventListeners();
-  
-  if (sampleRateInput && sampleRateNumInput) {
-    sampleRate = parseFloat(sampleRateInput.value);
-    sampleRateNumInput.value = sampleRate;
+// 초기화 함수 개선
+async function initialize() {
+  try {
+    // 이벤트 리스너 설정
+    setupEventListeners();
+    
+    // 초기 시각화
+    drawAllGuides();
+    
+    // 컨트롤 초기 상태 설정
+    enableControls(false);
+    
+    // 사용자 상호작용 이벤트 리스너 추가
+    const userInteractionEvents = ['click', 'touchstart', 'keydown'];
+    const initAudioContext = async () => {
+      try {
+        await initializeAudioContext();
+        console.log('오디오 시스템이 성공적으로 초기화되었습니다.');
+        // 이벤트 리스너 제거
+        userInteractionEvents.forEach(event => {
+          document.removeEventListener(event, initAudioContext);
+        });
+      } catch (error) {
+        console.error('오디오 컨텍스트 초기화 실패:', error);
+      }
+    };
+
+    // 사용자 상호작용 이벤트 리스너 등록
+    userInteractionEvents.forEach(event => {
+      document.addEventListener(event, initAudioContext, { once: true });
+    });
+    
+  } catch (error) {
+    console.error('초기화 중 오류 발생:', error);
+    alert('시스템 초기화 중 오류가 발생했습니다. 페이지를 새로고침해주세요.');
   }
 }
 
-// 오디오 재생
-function playAudio(buffer) {
-  if (audioSource) {
-    audioSource.stop();
+// 컨트롤 활성화/비활성화 함수
+function enableControls(enabled) {
+  const controls = [
+    playOriginalBtn,
+    playProcessedBtn,
+    pauseBtn,
+    stopBtn,
+    volumeControl,
+    sampleRateInput,
+    sampleRateNumInput
+  ];
+  
+  controls.forEach(control => {
+    if (control) {
+      control.disabled = !enabled;
+    }
+  });
+}
+
+// 진행 상태 업데이트 함수
+function updateProgress(percent) {
+  if (progressBar) {
+    progressBar.style.width = `${percent}%`;
   }
-  
-  audioSource = audioContext.createBufferSource();
-  audioSource.buffer = buffer;
-  audioSource.connect(gainNode);
-  
-  if (gainNode) {
-    gainNode.gain.value = volumeControl ? volumeControl.value / 100 : 1;
+  if (progressText) {
+    progressText.textContent = `${percent}%`;
   }
+}
+
+// 오디오 재생 함수 개선
+async function playAudio(buffer) {
+  if (!buffer || !audioContext) return;
   
-  audioSource.start();
-  isPlaying = true;
-  
-  if (pauseBtn) pauseBtn.disabled = false;
-  if (stopBtn) stopBtn.disabled = false;
-  if (playOriginalBtn) playOriginalBtn.disabled = true;
-  if (playProcessedBtn) playProcessedBtn.disabled = true;
+  try {
+    // 이전 오디오 소스 정리
+    cleanupAudioSource();
+    
+    // 새로운 오디오 소스 생성
+    audioSource = audioContext.createBufferSource();
+    audioSource.buffer = buffer;
+    
+    // 게인 노드 생성 및 연결
+    gainNode = audioContext.createGain();
+    gainNode.gain.value = volumeControl.value / 100;
+    
+    // 노드 연결
+    audioSource.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // 재생 완료 이벤트 처리
+    audioSource.onended = () => {
+      isPlaying = false;
+      updatePlaybackControls();
+    };
+    
+    // 재생 시작
+    audioSource.start(0);
+    isPlaying = true;
+    updatePlaybackControls();
+    
+  } catch (error) {
+    console.error('오디오 재생 중 오류:', error);
+    alert('오디오 재생 중 오류가 발생했습니다.');
+    isPlaying = false;
+    updatePlaybackControls();
+  }
+}
+
+// 재생 컨트롤 업데이트 함수
+function updatePlaybackControls() {
+  if (playOriginalBtn) playOriginalBtn.disabled = isPlaying;
+  if (playProcessedBtn) playProcessedBtn.disabled = isPlaying;
+  if (pauseBtn) pauseBtn.disabled = !isPlaying;
+  if (stopBtn) stopBtn.disabled = !isPlaying;
 }
 
 // 오디오 일시정지
@@ -517,8 +700,4 @@ function stopAudio() {
 }
 
 // 페이지 로드 시 초기화
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialize);
-} else {
-  initialize();
-} 
+document.addEventListener('DOMContentLoaded', initialize); 
