@@ -72,6 +72,16 @@
       <h2>이진수 퀴즈</h2>
       <p>이진수를 십진수로 변환하는 퀴즈를 풀어보세요!</p>
       <div class="quiz-section">
+        <div class="difficulty-selector">
+          <h3>난이도 선택</h3>
+          <div class="difficulty-buttons">
+            <button class="difficulty-btn" data-bits="3">3비트 (초급)</button>
+            <button class="difficulty-btn" data-bits="4">4비트 (중급)</button>
+            <button class="difficulty-btn" data-bits="5">5비트 (중상급)</button>
+            <button class="difficulty-btn" data-bits="6">6비트 (상급)</button>
+            <button class="difficulty-btn" data-bits="7">7비트 (최상급)</button>
+          </div>
+        </div>
         <button class="quiz-start-btn" onclick="startQuiz()">퀴즈 풀기</button>
       </div>
     </section>
@@ -84,6 +94,10 @@
           <span class="close-btn" onclick="closeQuizModal()">&times;</span>
         </div>
         <div class="modal-body">
+          <div class="quiz-info">
+            <span id="currentDifficulty">현재 난이도: 3비트</span>
+            <span id="quizScore">점수: 0</span>
+          </div>
           <div id="quizQuestion" class="quiz-question"></div>
           <div class="quiz-input">
             <input type="number" id="quizAnswer" placeholder="답을 입력하세요" />

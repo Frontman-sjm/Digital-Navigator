@@ -28,6 +28,29 @@ function convertToBinary() {
 // 퀴즈 관련 변수
 let currentBinary = '';
 let currentDecimal = 0;
+let currentBits = 3; // 기본 난이도: 3비트
+let score = 0;
+let consecutiveCorrect = 0;
+
+// 난이도 선택 이벤트 리스너
+document.addEventListener('DOMContentLoaded', function () {
+  const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+  difficultyButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      // 이전 선택 제거
+      difficultyButtons.forEach(btn => btn.classList.remove('active'));
+      // 현재 선택 활성화
+      this.classList.add('active');
+      // 난이도 설정
+      currentBits = parseInt(this.dataset.bits);
+      // 난이도 표시 업데이트
+      document.getElementById('currentDifficulty').textContent = `현재 난이도: ${currentBits}비트`;
+    });
+  });
+
+  // 기본 난이도 버튼 활성화
+  difficultyButtons[0].classList.add('active');
+});
 
 // 모달 열기
 function startQuiz() {
@@ -37,6 +60,7 @@ function startQuiz() {
   document.getElementById('quizAnswer').value = '';
   document.getElementById('quizResult').textContent = '';
   document.getElementById('quizResult').className = 'quiz-result';
+  document.getElementById('quizScore').textContent = `점수: ${score}`;
 }
 
 // 모달 닫기
@@ -47,8 +71,9 @@ function closeQuizModal() {
 
 // 퀴즈 생성
 function generateQuiz() {
-  currentDecimal = Math.floor(Math.random() * 256); // 0-255 사이의 랜덤 숫자
-  currentBinary = currentDecimal.toString(2).padStart(8, '0');
+  const maxValue = Math.pow(2, currentBits) - 1;
+  currentDecimal = Math.floor(Math.random() * (maxValue + 1));
+  currentBinary = currentDecimal.toString(2).padStart(currentBits, '0');
   document.getElementById('quizQuestion').textContent = `이진수 ${currentBinary}를 십진수로 변환하면?`;
 }
 
@@ -56,7 +81,7 @@ function generateQuiz() {
 function checkAnswer() {
   const userAnswer = parseInt(document.getElementById('quizAnswer').value);
   const resultDiv = document.getElementById('quizResult');
-  
+
   if (isNaN(userAnswer)) {
     resultDiv.textContent = '숫자를 입력해주세요.';
     resultDiv.className = 'quiz-result incorrect';
@@ -64,8 +89,18 @@ function checkAnswer() {
   }
 
   if (userAnswer === currentDecimal) {
-    resultDiv.textContent = '정답입니다! 🎉';
+    // 연속 정답 카운트 증가
+    consecutiveCorrect++;
+    // 점수 계산 (난이도에 따라 가중치 부여)
+    const points = currentBits * consecutiveCorrect;
+    score += points;
+
+    resultDiv.textContent = `정답입니다! 🎉 (+${points}점)`;
     resultDiv.className = 'quiz-result correct';
+
+    // 점수 업데이트
+    document.getElementById('quizScore').textContent = `점수: ${score}`;
+
     setTimeout(() => {
       generateQuiz();
       document.getElementById('quizAnswer').value = '';
@@ -73,20 +108,22 @@ function checkAnswer() {
       resultDiv.className = 'quiz-result';
     }, 2000);
   } else {
+    // 연속 정답 카운트 초기화
+    consecutiveCorrect = 0;
     resultDiv.textContent = `틀렸습니다. 정답은 ${currentDecimal}입니다.`;
     resultDiv.className = 'quiz-result incorrect';
   }
 }
 
 // Enter 키로 정답 확인
-document.getElementById('quizAnswer').addEventListener('keypress', function(e) {
+document.getElementById('quizAnswer').addEventListener('keypress', function (e) {
   if (e.key === 'Enter') {
     checkAnswer();
   }
 });
 
 // 모달 외부 클릭 시 닫기
-window.onclick = function(event) {
+window.onclick = function (event) {
   const modal = document.getElementById('quizModal');
   if (event.target === modal) {
     closeQuizModal();
@@ -94,6 +131,6 @@ window.onclick = function(event) {
 }
 
 // 페이지 로드 시 퀴즈 생성
-window.onload = function() {
+window.onload = function () {
   generateQuiz();
 }; 
