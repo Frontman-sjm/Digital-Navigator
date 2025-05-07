@@ -22,9 +22,12 @@
 
   <main>
     <section>
-      <h2>대표 ASCII 문자 표</h2>
+      <h2>아스키 코드(ASCII Code)</h2>
       <p class="intro-text">
-        컴퓨터는 모든 문자를 숫자로 저장합니다. <strong>ASCII 코드</strong>는 영어 알파벳, 숫자, 특수문자, 그리고 줄바꿈·탭·공백 등 제어 문자를 컴퓨터가 이해할 수 있는 숫자로 변환한 표준입니다.<br>
+        컴퓨팅 시스템 각 문자를 이진수로 조합한 약속된 코드값인 <strong>문자 코드</strong>를 사용하여 저장하고 표현합니다. 대표적인 문자 코드로는 <strong>아스키 코드(ASCII Code)</strong>와 <strong>유니 코드(Unicode)</strong>가 있습니다.<br>
+        <strong>아스키 코드(ASCII Code)</strong>는 미국 표준화 협회에서 제작한 문자 코드로 알파벳, 숫자, 특수문자, 제어 문자(줄바꿈·탭·공백 등)을 표현할 수 있습니다.<br>
+        또한, <strong>7비트</strong>를 사용하여 <strong>총 128개</strong>의 문자를 표현할 수 있습니다.<br>
+        *맨 왼쪽에 패리티 비트(Parity bit)라고 하는 1비트를 추가하여 오류 여부를 판단합니다. 그래서 실질적으로는 8비트로 표현이 됩니다. 이 패리티 비트는 0으로 유지되며 만약, 1인 경우에는 오류가 있는 것으로 간주합니다.<br> 
         아래 표에는 자주 사용되는 <strong>제어 문자(예: 줄바꿈, 탭, 공백, DEL 등)</strong>와 <strong>출력 가능 문자(숫자, 대문자, 소문자, 주요 특수문자)</strong>만을 엄선하여 2진수, 10진수, 문자(또는 설명)로 정리했습니다.
       </p>
       <table class="ascii-table" style="margin:2rem auto; min-width:350px; max-width:900px;">
@@ -88,7 +91,7 @@
         <div class="input-guide">
           <strong>※ 주의사항</strong>
           <ul>
-            <li>각 문자는 8비트(8자리)로 입력해주세요.</li>
+            <li>각 문자는 8비트(패리티 비트+아스키 코드값)로 입력해주세요.</li>
             <li>문자 사이에 <strong>반드시 띄어쓰기</strong>를 해주세요.</li>
             <li>예시: 01001000 01101001 (Hi)</li>
           </ul>
