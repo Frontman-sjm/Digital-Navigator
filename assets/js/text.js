@@ -153,42 +153,94 @@ class BingoGame {
     this.currentBoard = [];
     this.isInitialized = false;
     this.boardCount = 0;
+    this.submitCount = 0;
+    this.usedChars = new Set();
+    this.isSubmitted = false;
+    this.submittedSelectedCells = new Set();
 
     // DOM 요소 캐싱
     this.elements = {
       board: document.getElementById('bingoBoard'),
+      submittedBoard: document.getElementById('submittedBingoBoard'),
+      submittedSection: document.querySelector('.submitted-bingo-section'),
       bingoCount: document.getElementById('bingoCount'),
+      submittedBingoCount: document.getElementById('submittedBingoCount'),
       boardCount: document.getElementById('boardCount'),
+      submitCount: document.getElementById('submitCount'),
+      submittedCount: document.getElementById('submittedCount'),
       createButton: document.getElementById('createBoardBtn'),
+      submitButton: document.getElementById('submitBoardBtn'),
       rowsInput: document.getElementById('bingoRows'),
       colsInput: document.getElementById('bingoCols'),
-      resultDiv: document.getElementById('bingoResult')
+      resultDiv: document.getElementById('bingoResult'),
+      submissionTime: document.getElementById('submissionTime')
     };
 
     // 이벤트 바인딩
     this.boundCreateEmptyBoard = this.createEmptyBoard.bind(this);
     this.boundResetGame = this.resetGame.bind(this);
+    this.boundSubmitBoard = this.submitBoard.bind(this);
   }
 
   initialize() {
     if (this.isInitialized) return;
 
-    // 저장된 빙고판 생성 횟수 불러오기
-    const savedCount = localStorage.getItem('bingoBoardCount');
-    if (savedCount) {
-      this.boardCount = parseInt(savedCount);
-      if (this.boardCount >= 5) {
-        alert('이전 게임에서 빙고판 생성 횟수가 5회를 초과했습니다. 게임을 재시작합니다.');
-        this.resetGame();
-        return;
-      }
-    }
+    // 페이지 로드 시 모든 카운트 초기화
+    this.resetAllCounts();
 
     // 이벤트 리스너 등록
     this.elements.createButton.addEventListener('click', this.boundCreateEmptyBoard);
-    document.getElementById('resetGameBtn')?.addEventListener('click', this.boundResetGame);
+    this.elements.submitButton.addEventListener('click', this.boundSubmitBoard);
+
+    // 게임 재시작 버튼 이벤트 리스너
+    const resetButton = document.getElementById('resetGameBtn');
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        this.resetAllCounts();
+        window.location.reload();
+      });
+    }
+
+    // 페이지 언로드 시 카운트 초기화
+    window.addEventListener('beforeunload', () => {
+      this.resetAllCounts();
+    });
 
     this.isInitialized = true;
+  }
+
+  resetAllCounts() {
+    // 모든 카운트 초기화
+    this.boardCount = 0;
+    this.submitCount = 0;
+    this.isSubmitted = false;
+    this.submittedSelectedCells.clear();
+
+    // 로컬 스토리지 초기화
+    localStorage.removeItem('bingoBoardCount');
+    localStorage.removeItem('bingoSubmitCount');
+
+    // 화면 표시 초기화
+    this.updateBoardCount();
+    this.updateSubmitCount();
+    this.elements.submittedSection.style.display = 'none';
+    this.elements.resultDiv.style.display = 'none';
+
+    // 버튼과 입력 필드 활성화
+    this.elements.createButton.disabled = false;
+    this.elements.submitButton.disabled = false;
+    this.elements.rowsInput.disabled = false;
+    this.elements.colsInput.disabled = false;
+  }
+
+  updateBoardCount() {
+    this.elements.boardCount.textContent = this.boardCount;
+    localStorage.setItem('bingoBoardCount', this.boardCount);
+  }
+
+  updateSubmitCount() {
+    this.elements.submitCount.textContent = this.submitCount;
+    localStorage.setItem('bingoSubmitCount', this.submitCount);
   }
 
   createEmptyBoard() {
@@ -199,10 +251,24 @@ class BingoGame {
       return;
     }
 
-    this.boardCount++;  // 빙고판 생성 시 카운트 증가
+    // 빙고판 생성 횟수 증가
+    this.boardCount++;
+    this.updateBoardCount();
+
+    // 빙고판 생성 횟수 제한 체크
+    if (this.boardCount > 5) {
+      alert('빙고판 생성 횟수가 5회를 초과했습니다. 게임을 재시작해주세요.');
+      this.resetGame();
+      return;
+    }
+
+    // 빙고판 생성 시 모든 상태 초기화
     this.resetBoard();
     this.generateEmptyBoard(rows, cols);
-    this.updateBoardCount();  // 생성 횟수 표시 업데이트
+
+    // 제출 상태 초기화
+    this.isSubmitted = false;
+    this.elements.submittedSection.style.display = 'none';
   }
 
   validateBoardSize(rows, cols) {
@@ -216,6 +282,7 @@ class BingoGame {
   resetBoard() {
     this.elements.board.innerHTML = '';
     this.selectedCells.clear();
+    this.usedChars.clear();
     this.bingoCount = 0;
     this.elements.bingoCount.textContent = this.bingoCount;
     this.currentBoard = [];
@@ -254,14 +321,31 @@ class BingoGame {
     const input = event.target;
     const char = input.value;
     const asciiDiv = cell.querySelector('.ascii');
+    const previousChar = this.currentBoard[row][col];
+
+    // 이전에 입력된 문자가 있었다면 usedChars에서 제거
+    if (previousChar) {
+      this.usedChars.delete(previousChar);
+    }
 
     if (char) {
       const code = char.charCodeAt(0);
       if (code >= 32 && code <= 126) {
+        // 중복 체크
+        if (this.usedChars.has(char)) {
+          input.value = '';
+          asciiDiv.textContent = '';
+          this.currentBoard[row][col] = null;
+          cell.classList.add('empty');
+          alert('이미 사용된 문자입니다. 다른 문자를 입력해주세요.');
+          return;
+        }
+
         // 10진수를 2진수로 변환하고 8자리로 패딩
-        const binary = code.toString(2).padStart(8, '0');
-        asciiDiv.textContent = binary;
+        const binaryCode = code.toString(2).padStart(8, '0');
+        asciiDiv.textContent = binaryCode;
         this.currentBoard[row][col] = char;
+        this.usedChars.add(char); // 사용된 문자 추가
         cell.classList.remove('empty');
       } else {
         input.value = '';
@@ -343,26 +427,148 @@ class BingoGame {
 
   showGameResult() {
     this.elements.resultDiv.style.display = 'flex';
+    // 게임 종료 시 3초 후 자동으로 페이지 새로고침
+    setTimeout(() => {
+      this.resetAllCounts();
+      window.location.reload();
+    }, 3000);
   }
 
-  updateBoardCount() {
-    // 빙고판 생성 횟수를 로컬 스토리지에 저장
-    localStorage.setItem('bingoBoardCount', this.boardCount);
+  submitBoard() {
+    // 빈 셀이 있는지 확인
+    const hasEmptyCells = this.currentBoard.some(row => row.some(cell => cell === null));
+    if (hasEmptyCells) {
+      alert('모든 칸을 채워주세요.');
+      return;
+    }
 
-    // 화면에 생성 횟수 표시
-    this.elements.boardCount.textContent = this.boardCount;
+    // 이미 제출된 경우
+    if (this.isSubmitted) {
+      alert('이미 제출된 빙고판입니다.');
+      return;
+    }
 
-    // 생성 횟수가 5회 이상이면 경고 메시지 표시
-    if (this.boardCount >= 5) {
-      alert('빙고판 생성 횟수가 5회를 초과했습니다. 게임을 재시작해주세요.');
-      this.resetGame();
+    // 제출 횟수 체크
+    if (this.submitCount >= 3) {
+      alert('제출 횟수가 3회를 초과했습니다. 게임을 재시작해주세요.');
+      return;
+    }
+
+    // 제출 횟수 증가
+    this.submitCount++;
+    this.updateSubmitCount();
+
+    // 제출용 빙고판 생성
+    this.elements.submittedBoard.style.gridTemplateColumns = `repeat(${this.currentBoard[0].length}, 80px)`;
+    this.elements.submittedBoard.innerHTML = '';
+
+    // 현재 빙고판의 내용을 제출용 빙고판에 복사
+    this.currentBoard.forEach((row, i) => {
+      row.forEach((char, j) => {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        const code = char.charCodeAt(0);
+        const binaryCode = code.toString(2).padStart(8, '0');
+        cell.innerHTML = `
+          <div class="char">${char}</div>
+          <div class="ascii">${binaryCode}</div>
+        `;
+
+        // 제출된 빙고판의 셀 클릭 이벤트 추가
+        cell.addEventListener('click', () => this.toggleSubmittedCell(cell, i, j));
+
+        this.elements.submittedBoard.appendChild(cell);
+      });
+    });
+
+    // 제출 시간 기록
+    const now = new Date();
+    this.elements.submissionTime.textContent = now.toLocaleString();
+
+    // 제출된 빙고 수와 제출 횟수 표시
+    this.elements.submittedBingoCount.textContent = '0';
+    this.elements.submittedCount.textContent = this.submitCount;
+
+    // 제출 섹션 표시
+    this.elements.submittedSection.style.display = 'block';
+
+    // 제출 상태 변경
+    this.isSubmitted = true;
+
+    // 제출 후에는 빙고판 수정 불가
+    this.elements.createButton.disabled = true;
+    this.elements.submitButton.disabled = true;
+    this.elements.rowsInput.disabled = true;
+    this.elements.colsInput.disabled = true;
+
+    // 현재 빙고판 비활성화
+    const cells = this.elements.board.querySelectorAll('.bingo-cell');
+    cells.forEach(cell => {
+      cell.style.pointerEvents = 'none';
+      cell.style.opacity = '0.5';
+    });
+  }
+
+  toggleSubmittedCell(cell, row, col) {
+    const cellKey = `${row},${col}`;
+    if (this.submittedSelectedCells.has(cellKey)) {
+      cell.classList.remove('selected');
+      this.submittedSelectedCells.delete(cellKey);
+    } else {
+      cell.classList.add('selected');
+      this.submittedSelectedCells.add(cellKey);
+    }
+    this.checkSubmittedBingo();
+  }
+
+  checkSubmittedBingo() {
+    const rows = this.currentBoard.length;
+    const cols = this.currentBoard[0].length;
+    let newBingoCount = 0;
+
+    // 가로 빙고 체크
+    for (let i = 0; i < rows; i++) {
+      if (this.isSubmittedLineComplete(i, 0, 0, 1)) newBingoCount++;
+    }
+
+    // 세로 빙고 체크
+    for (let j = 0; j < cols; j++) {
+      if (this.isSubmittedLineComplete(0, j, 1, 0)) newBingoCount++;
+    }
+
+    // 대각선 빙고 체크 (정사각형인 경우에만)
+    if (rows === cols) {
+      if (this.isSubmittedLineComplete(0, 0, 1, 1)) newBingoCount++;
+      if (this.isSubmittedLineComplete(0, cols - 1, 1, -1)) newBingoCount++;
+    }
+
+    this.updateSubmittedBingoCount(newBingoCount);
+  }
+
+  isSubmittedLineComplete(startRow, startCol, rowStep, colStep) {
+    const rows = this.currentBoard.length;
+    const cols = this.currentBoard[0].length;
+
+    for (let i = 0; i < rows; i++) {
+      const row = startRow + i * rowStep;
+      const col = startCol + i * colStep;
+
+      if (row >= rows || col >= cols || row < 0 || col < 0) return false;
+      if (!this.submittedSelectedCells.has(`${row},${col}`)) return false;
+    }
+    return true;
+  }
+
+  updateSubmittedBingoCount(newCount) {
+    this.elements.submittedBingoCount.textContent = newCount;
+
+    if (newCount >= 3) {
+      this.showGameResult();
     }
   }
 
   resetGame() {
-    this.elements.resultDiv.style.display = 'none';
-    this.boardCount = 0;  // 게임 재시작 시 카운트 초기화
-    localStorage.removeItem('bingoBoardCount');  // 로컬 스토리지에서도 제거
+    this.resetAllCounts();
     this.createEmptyBoard();
   }
 }

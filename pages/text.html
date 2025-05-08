@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>문자의 디지털 표현</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    .ascii {
+      font-size: 0.8em;
+      color: #666;
+      margin-top: 2px;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -126,14 +135,26 @@
             <label for="bingoCols">열:</label>
             <input type="number" id="bingoCols" min="3" max="10" value="5">
             <button onclick="createEmptyBingoBoard()" id="createBoardBtn">빈 빙고판 생성</button>
+            <button onclick="submitBingoBoard()" id="submitBoardBtn">제출하기</button>
           </div>
           <div class="game-stats">
             <span>현재 빙고: <span id="bingoCount">0</span>개</span>
             <span>빙고판 생성: <span id="boardCount">0</span>회</span>
+            <span>제출 횟수: <span id="submitCount">0</span>회</span>
           </div>
         </div>
         
         <div class="bingo-board" id="bingoBoard"></div>
+        
+        <div class="submitted-bingo-section" style="display: none;">
+          <h3>제출된 빙고판</h3>
+          <div class="bingo-board" id="submittedBingoBoard"></div>
+          <div class="submitted-bingo-info">
+            <p>제출 시간: <span id="submissionTime"></span></p>
+            <p>빙고 수: <span id="submittedBingoCount">0</span>개</p>
+            <p>제출 횟수: <span id="submittedCount">0</span>회</p>
+          </div>
+        </div>
         
         <div class="bingo-result" id="bingoResult" style="display: none;">
           <div class="result-content">
