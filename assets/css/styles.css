@@ -2705,9 +2705,50 @@ canvas {
   overflow: hidden;
 }
 
-.bingo-cell:hover {
+.bingo-cell.empty {
+  background: #f8f9fa;
+}
+
+.bingo-cell .char-input {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.25rem;
+  padding: 0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.bingo-cell .char-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bingo-cell .char-input::placeholder {
+  color: #95a5a6;
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+.bingo-cell.empty .char-input {
+  background: #f8f9fa;
+  border-style: dashed;
+}
+
+.bingo-cell.empty .char-input:focus {
+  background: white;
+  border-style: solid;
+}
+
+.bingo-cell .ascii {
+  font-size: 0.8rem;
+  color: #666;
 }
 
 .bingo-cell.selected {
@@ -2716,19 +2757,17 @@ canvas {
   border-color: #2980b9;
 }
 
-.bingo-cell .char {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.bingo-cell .ascii {
-  font-size: 0.8rem;
-  color: #666;
-}
-
 .bingo-cell.selected .ascii {
   color: rgba(255, 255, 255, 0.8);
+}
+
+.bingo-cell.selected .char-input {
+  color: white;
+}
+
+.bingo-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .bingo-result {

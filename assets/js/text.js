@@ -148,17 +148,17 @@ function convertBinaryToChar() {
 // 빙고 게임 클래스 정의
 class BingoGame {
   constructor() {
-    this.boardCount = 0;
     this.bingoCount = 0;
     this.selectedCells = new Set();
     this.currentBoard = [];
     this.isInitialized = false;
+    this.boardCount = 0;
 
     // DOM 요소 캐싱
     this.elements = {
       board: document.getElementById('bingoBoard'),
-      boardCount: document.getElementById('boardCount'),
       bingoCount: document.getElementById('bingoCount'),
+      boardCount: document.getElementById('boardCount'),
       createButton: document.getElementById('createBoardBtn'),
       rowsInput: document.getElementById('bingoRows'),
       colsInput: document.getElementById('bingoCols'),
@@ -166,21 +166,32 @@ class BingoGame {
     };
 
     // 이벤트 바인딩
-    this.boundCreateBoard = this.createBoard.bind(this);
+    this.boundCreateEmptyBoard = this.createEmptyBoard.bind(this);
     this.boundResetGame = this.resetGame.bind(this);
   }
 
   initialize() {
     if (this.isInitialized) return;
 
+    // 저장된 빙고판 생성 횟수 불러오기
+    const savedCount = localStorage.getItem('bingoBoardCount');
+    if (savedCount) {
+      this.boardCount = parseInt(savedCount);
+      if (this.boardCount >= 5) {
+        alert('이전 게임에서 빙고판 생성 횟수가 5회를 초과했습니다. 게임을 재시작합니다.');
+        this.resetGame();
+        return;
+      }
+    }
+
     // 이벤트 리스너 등록
-    this.elements.createButton.addEventListener('click', this.boundCreateBoard);
+    this.elements.createButton.addEventListener('click', this.boundCreateEmptyBoard);
     document.getElementById('resetGameBtn')?.addEventListener('click', this.boundResetGame);
 
     this.isInitialized = true;
   }
 
-  createBoard() {
+  createEmptyBoard() {
     const rows = parseInt(this.elements.rowsInput.value);
     const cols = parseInt(this.elements.colsInput.value);
 
@@ -188,10 +199,10 @@ class BingoGame {
       return;
     }
 
-    this.boardCount++;
-    this.updateBoardCount();
+    this.boardCount++;  // 빙고판 생성 시 카운트 증가
     this.resetBoard();
-    this.generateBoard(rows, cols);
+    this.generateEmptyBoard(rows, cols);
+    this.updateBoardCount();  // 생성 횟수 표시 업데이트
   }
 
   validateBoardSize(rows, cols) {
@@ -202,10 +213,6 @@ class BingoGame {
     return true;
   }
 
-  updateBoardCount() {
-    this.elements.boardCount.textContent = this.boardCount;
-  }
-
   resetBoard() {
     this.elements.board.innerHTML = '';
     this.selectedCells.clear();
@@ -214,43 +221,66 @@ class BingoGame {
     this.currentBoard = [];
   }
 
-  generateBoard(rows, cols) {
-    const usedChars = new Set();
+  generateEmptyBoard(rows, cols) {
     this.elements.board.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
 
     for (let i = 0; i < rows; i++) {
       const row = [];
       for (let j = 0; j < cols; j++) {
-        const char = this.generateUniqueChar(usedChars);
-        row.push(char);
-        this.createCell(char, i, j);
+        row.push(null);
+        this.createEmptyCell(i, j);
       }
       this.currentBoard.push(row);
     }
   }
 
-  generateUniqueChar(usedChars) {
-    let char;
-    do {
-      const code = Math.floor(Math.random() * (126 - 32 + 1)) + 32;
-      char = String.fromCharCode(code);
-    } while (usedChars.has(char));
-    usedChars.add(char);
-    return char;
-  }
-
-  createCell(char, row, col) {
+  createEmptyCell(row, col) {
     const cell = document.createElement('div');
-    cell.className = 'bingo-cell';
+    cell.className = 'bingo-cell empty';
     cell.innerHTML = `
-      <div class="char">${char}</div>
-      <div class="ascii">${char.charCodeAt(0)}</div>
+      <input type="text" maxlength="1" class="char-input" placeholder="문자">
+      <div class="ascii"></div>
     `;
+
+    const input = cell.querySelector('.char-input');
+    input.addEventListener('input', (e) => this.updateCellContent(e, cell, row, col));
+    input.addEventListener('click', (e) => e.stopPropagation());
+
     cell.addEventListener('click', () => this.toggleCell(cell, row, col));
     this.elements.board.appendChild(cell);
   }
 
+  updateCellContent(event, cell, row, col) {
+    const input = event.target;
+    const char = input.value;
+    const asciiDiv = cell.querySelector('.ascii');
+
+    if (char) {
+      const code = char.charCodeAt(0);
+      if (code >= 32 && code <= 126) {
+        asciiDiv.textContent = code;
+        this.currentBoard[row][col] = char;
+        cell.classList.remove('empty');
+      } else {
+        input.value = '';
+        asciiDiv.textContent = '';
+        this.currentBoard[row][col] = null;
+        cell.classList.add('empty');
+        alert('ASCII 문자만 입력 가능합니다 (32-126).');
+      }
+    } else {
+      asciiDiv.textContent = '';
+      this.currentBoard[row][col] = null;
+      cell.classList.add('empty');
+    }
+  }
+
   toggleCell(cell, row, col) {
+    if (this.currentBoard[row][col] === null) {
+      alert('먼저 문자를 입력해주세요.');
+      return;
+    }
+
     const cellKey = `${row},${col}`;
     if (this.selectedCells.has(cellKey)) {
       cell.classList.remove('selected');
@@ -313,9 +343,25 @@ class BingoGame {
     this.elements.resultDiv.style.display = 'flex';
   }
 
+  updateBoardCount() {
+    // 빙고판 생성 횟수를 로컬 스토리지에 저장
+    localStorage.setItem('bingoBoardCount', this.boardCount);
+
+    // 화면에 생성 횟수 표시
+    this.elements.boardCount.textContent = this.boardCount;
+
+    // 생성 횟수가 5회 이상이면 경고 메시지 표시
+    if (this.boardCount >= 5) {
+      alert('빙고판 생성 횟수가 5회를 초과했습니다. 게임을 재시작해주세요.');
+      this.resetGame();
+    }
+  }
+
   resetGame() {
     this.elements.resultDiv.style.display = 'none';
-    this.createBoard();
+    this.boardCount = 0;  // 게임 재시작 시 카운트 초기화
+    localStorage.removeItem('bingoBoardCount');  // 로컬 스토리지에서도 제거
+    this.createEmptyBoard();
   }
 }
 
