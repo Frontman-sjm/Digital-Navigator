@@ -258,7 +258,9 @@ class BingoGame {
     if (char) {
       const code = char.charCodeAt(0);
       if (code >= 32 && code <= 126) {
-        asciiDiv.textContent = code;
+        // 10진수를 2진수로 변환하고 8자리로 패딩
+        const binary = code.toString(2).padStart(8, '0');
+        asciiDiv.textContent = binary;
         this.currentBoard[row][col] = char;
         cell.classList.remove('empty');
       } else {
