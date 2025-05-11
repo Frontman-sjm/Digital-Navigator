@@ -112,8 +112,8 @@ const ctx = canvas.getContext('2d');
 const duration = 1; // 1초 구간
 const freq = 2; // 2Hz 사인파 예시
 const amplitude = 1; // 진폭
-const quantizeBits = 8; // 8비트 양자화
-const quantizeLevels = Math.pow(2, quantizeBits);
+const quantizeBits = 3; // 3비트 양자화
+const quantizeLevels = Math.pow(2, quantizeBits); // 8레벨
 
 function drawSamplingGraph(sampleCount) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -182,9 +182,9 @@ function drawSamplingGraph(sampleCount) {
   for (let i = 0; i < sampleCount; i++) {
     const t = (i / (sampleCount - 1)) * duration;
     const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
-    // 8비트 양자화 (0-255)
-    const q = Math.round(((y + 1) / 2) * 255);
-    const yq = (q / 255) * 2 - 1;
+    // 3비트(0~7) 양자화
+    const q = Math.round(((y + 1) / 2) * (quantizeLevels - 1));
+    const yq = (q / (quantizeLevels - 1)) * 2 - 1;
     const cx = margin + (w * i) / (sampleCount - 1);
     const cyq = margin + h / 2 - yq * (h / 2 * 0.85);
     // 점
@@ -199,8 +199,8 @@ function drawSamplingGraph(sampleCount) {
     ctx.fillStyle = '#43A047';
     // 계단선(양자화 연결)
     if (i > 0) {
-      const prevQ = Math.round(((Math.sin(2 * Math.PI * freq * ((i - 1) / (sampleCount - 1))) + 1) / 2) * 255);
-      const prevYq = (prevQ / 255) * 2 - 1;
+      const prevQ = Math.round(((Math.sin(2 * Math.PI * freq * ((i - 1) / (sampleCount - 1))) + 1) / 2) * (quantizeLevels - 1));
+      const prevYq = (prevQ / (quantizeLevels - 1)) * 2 - 1;
       const prevCx = margin + (w * (i - 1)) / (sampleCount - 1);
       const prevCyq = margin + h / 2 - prevYq * (h / 2 * 0.85);
       ctx.beginPath();
@@ -343,9 +343,9 @@ function drawEncoding(audioData = null, isExample = false) {
     const x = PADDING + (i * (encodingCanvas.width - PADDING * 2) / (totalSamples - 1));
     const value = audioData[idx];
 
-    // 양자화 (8비트)
-    const quantized = Math.round((value + 1) / 2 * 255);
-    const binary = quantized.toString(2).padStart(8, '0');
+    // 양자화 (3비트)
+    const quantized = Math.round((value + 1) / 2 * 7);
+    const binary = quantized.toString(2).padStart(3, '0');
 
     // 샘플 번호
     encodingCtx.font = 'bold 12px Arial';
@@ -367,19 +367,19 @@ function drawEncoding(audioData = null, isExample = false) {
     // 이진수 표시
     encodingCtx.font = '14px Courier New';
     encodingCtx.fillStyle = '#333';
-    for (let j = 0; j < 8; j++) {
+    for (let j = 0; j < 3; j++) {
       const bit = binary[j];
-      const bitX = x - BINARY_WIDTH / 2 + (j * BINARY_WIDTH / 8);
+      const bitX = x - BINARY_WIDTH / 2 + (j * BINARY_WIDTH / 3);
       const bitY = PADDING + 60;
 
       // 비트 배경
       encodingCtx.fillStyle = bit === '1' ? '#E3F2FD' : '#F5F5F5';
-      encodingCtx.fillRect(bitX - 2, bitY - 15, BINARY_WIDTH / 8 - 2, 20);
+      encodingCtx.fillRect(bitX - 2, bitY - 15, BINARY_WIDTH / 3 - 2, 20);
 
       // 비트 값
       encodingCtx.fillStyle = bit === '1' ? '#1976D2' : '#666';
       encodingCtx.textAlign = 'center';
-      encodingCtx.fillText(bit, bitX + BINARY_WIDTH / 16 - 2, bitY);
+      encodingCtx.fillText(bit, bitX + BINARY_WIDTH / 6 - 2, bitY);
     }
   }
 
