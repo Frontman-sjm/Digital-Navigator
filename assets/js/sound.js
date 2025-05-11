@@ -182,9 +182,9 @@ function drawSamplingGraph(sampleCount) {
   for (let i = 0; i < sampleCount; i++) {
     const t = (i / (sampleCount - 1)) * duration;
     const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
-    // 8비트 양자화
-    const q = Math.round(((y + 1) / 2) * (quantizeLevels - 1));
-    const yq = (q / (quantizeLevels - 1)) * 2 - 1;
+    // 8비트 양자화 (0-255)
+    const q = Math.round(((y + 1) / 2) * 255);
+    const yq = (q / 255) * 2 - 1;
     const cx = margin + (w * i) / (sampleCount - 1);
     const cyq = margin + h / 2 - yq * (h / 2 * 0.85);
     // 점
@@ -195,12 +195,12 @@ function drawSamplingGraph(sampleCount) {
     ctx.font = 'bold 13px Arial';
     ctx.fillStyle = '#388E3C';
     ctx.textAlign = 'center';
-    ctx.fillText(q, cx, cyq + 22);
+    ctx.fillText(q.toString(), cx, cyq + 22);
     ctx.fillStyle = '#43A047';
     // 계단선(양자화 연결)
     if (i > 0) {
-      const prevQ = Math.round(((Math.sin(2 * Math.PI * freq * ((i - 1) / (sampleCount - 1))) + 1) / 2) * (quantizeLevels - 1));
-      const prevYq = (prevQ / (quantizeLevels - 1)) * 2 - 1;
+      const prevQ = Math.round(((Math.sin(2 * Math.PI * freq * ((i - 1) / (sampleCount - 1))) + 1) / 2) * 255);
+      const prevYq = (prevQ / 255) * 2 - 1;
       const prevCx = margin + (w * (i - 1)) / (sampleCount - 1);
       const prevCyq = margin + h / 2 - prevYq * (h / 2 * 0.85);
       ctx.beginPath();
