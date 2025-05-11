@@ -211,40 +211,50 @@
     </section>
     <section class="step">
       <h2>1단계: 표본화 (Sampling)</h2>
+          <p>
+            <strong>표본화</strong>란? 아날로그 소리 파형을 일정한 시간 간격으로 나누어 소리의 강도를 측정해서 샘플을 추출하는 과정입니다. 이 때, 이 일정한 시간 간격에 따라 소리의 강도를 측정하는 것을 <strong>주기</strong>라고 합니다.<br>
+            주기의 횟수가 너무 적으면 원래 소리를 제대로 재현해내지 못하며, 주기의 횟수가 너무 많으면 정확한 소리를 측정할 수 있지만 용량이 너무 커집니다.<br>
+            예시 : CD 오디오는 1초에 44,100번 표본화(44.1kHz)합니다. 이 말은 매 1/44100초마다 한 번씩 소리의 크기를 측정한다는 뜻입니다.
+          </p>
+      <div class="sampling-guide">  
+        <p style="margin-top:1rem;color:#1976D2;font-weight:bold; text-align: center;">
+          1. 슬라이더를 움직이면 표본화 주기(1~12)가 바뀌며, 그래프가 실시간으로 갱신됩니다.<br>
+          2. 파란 점: 표본화값(실수값)만 표시됩니다.<br>
+          3. 각 점 위에 표본화값이 표시됩니다.<br>
+        </p>
+      </div>
       <div class="sampling-controls">
-        <label for="samplingRateSlider"><strong>샘플링 주기(횟수):</strong> <span id="samplingRateValue">12</span></label>
+        <label for="samplingRateSlider"><strong>표본화 주기(횟수):</strong> <span id="samplingRateValue">12</span></label>
         <input type="range" id="samplingRateSlider" min="1" max="12" value="12" step="1">
       </div>
       <canvas id="samplingCanvas" width="900" height="320" style="width:100%;max-width:900px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
-      <div class="sampling-guide">
-        <ul>
-          <li>슬라이더를 움직이면 표본화(샘플링) 주기가 바뀌며, 그래프가 실시간으로 갱신됩니다.</li>
-          <li>파란 점: 표본화(실수값)만 표시됩니다.</li>
-          <li>각 점 위에 표본화값이 표시됩니다.</li>
-        </ul>
-        <p style="margin-top:1rem;color:#1976D2;font-weight:bold;">※ 표본화란? 연속적인 아날로그 신호에서 일정한 시간 간격으로 값을 뽑아내는 과정입니다.</p>
-      </div>
     </section>
     <section class="step">
       <h2>2단계: 양자화 (Quantization)</h2>
-      <p>표본화된 실수값을 가장 가까운 정수(0~15, 4비트)로 변환하는 과정입니다.</p>
+      <p>
+        <strong>양자화</strong>란? 표본화에서 추출된 샘플을 특정 범위의 숫자로 표현하는 과정입니다.<br>
+        <strong>양자화 잡음</strong> : 양자화 과정에서 일부 소리 정보가 손실되어 이로 인해 잡음이 발생하는 것을 말합니다. 비트를 많이 사용할수록 더 정밀하게 표현할 수 있고 잡음은 줄어듭니다.<br>
+        예시 : 16비트 양자화는 2¹⁶ = 65,536단계로 진폭을 나누는 것을 의미합니다. 각 샘플은 가장 가까운 레벨에 반올림되어 저장됩니다.
+      </p>
       <div class="controls">
-        <p class="quantization-info">양자화 비트 수: 4비트 (0~15)</p>
+        <p style="margin-top:1rem;color:#1976D2;font-weight:bold; text-align: center;">
+          1. 아래 그래프는 총 4비트를 사용하여 0~15 사이의 숫자 범위로 표현됩니다.<br>
+          2. 파란 점: 표본화값을 의미하며, 검은 막대: 양자화값을 표시합니다.<br>
+          3.각 막대 위에 양자화 값이 표시됩니다.
+        </p>
       </div>
       <div class="canvas-container">
         <canvas id="quantizationCanvas"></canvas>
       </div>
-      <div class="sampling-guide">
-        <ul>
-          <li>파란 점: 표본화(실수값), 검은 막대: 양자화(정수값, 0~15)</li>
-          <li>각 막대 위에 양자화 값이 표시됩니다.</li>
-        </ul>
-        <p style="margin-top:1rem;color:#388E3C;font-weight:bold;">※ 양자화란? 표본화된 값을 정해진 레벨(여기선 16단계)로 반올림하는 과정입니다.</p>
-      </div>
+      
     </section>
     <section class="step">
       <h2>3단계: 부호화 (Encoding)</h2>
-      <p>양자화된 값을 4비트 이진수로 변환하여 저장하는 과정입니다.</p>
+      <p>
+        <strong>부호화</strong>란? 양자화를 통해 구한 숫자를 0과 1의 비트로 변환하는 과정입니다.<br>
+        부호화 단계에서는 용량을 줄이기 위한 <strong>압축 기법</strong>을 적용하기도 합니다.<br>
+        예시 : 16비트 양자화된 값 하나는 2진수 16자리로 표현됩니다. 이렇게 하면 컴퓨터나 디지털 장치가 저장하거나 전송할 수 있습니다.
+      </p>
       <div class="audio-controls">
         <div class="playback-controls">
           <button id="playOriginal" class="control-btn">원본 재생</button>
@@ -261,15 +271,15 @@
           <div id="qualityMetrics"></div>
         </div>
       </div>
+      <div class="sampling-guide">
+        <p style="margin-top:1rem;color:#1976D2;font-weight:bold; text-align: center;">
+          양자화값(정수)과 부호화값(4비트 이진수)이 나란히 표시됩니다.
+        </p>
+      </div>
       <div class="canvas-container">
         <canvas id="encodingCanvas"></canvas>
       </div>
-      <div class="sampling-guide">
-        <ul>
-          <li>정수값(0~15)과 4비트 이진수가 나란히 표시됩니다.</li>
-        </ul>
-        <p style="margin-top:1rem;color:#1976D2;font-weight:bold;">※ 부호화란? 양자화된 값을 2진수로 바꿔 디지털로 저장하는 과정입니다.</p>
-      </div>
+      
     </section>
   </main>
 
