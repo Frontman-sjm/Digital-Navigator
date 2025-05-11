@@ -117,7 +117,6 @@ const quantizeLevels = Math.pow(2, quantizeBits); // 8레벨
 
 function drawSamplingGraph(sampleCount) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // 좌표 변환
   const margin = 40;
   const w = canvas.width - margin * 2;
   const h = canvas.height - margin * 2;
@@ -130,7 +129,6 @@ function drawSamplingGraph(sampleCount) {
   ctx.lineTo(margin + w, margin + h / 2);
   ctx.stroke();
   ctx.restore();
-
   // 아날로그 곡선
   ctx.save();
   ctx.strokeStyle = '#1976D2';
@@ -145,8 +143,7 @@ function drawSamplingGraph(sampleCount) {
   }
   ctx.stroke();
   ctx.restore();
-
-  // 표본화 (샘플링)
+  // 표본화(실수값) 점 및 주기 라벨
   ctx.save();
   ctx.strokeStyle = '#2196F3';
   ctx.fillStyle = '#2196F3';
@@ -171,43 +168,11 @@ function drawSamplingGraph(sampleCount) {
     ctx.textAlign = 'center';
     ctx.fillText(y.toFixed(2), cx, cy - 14);
     ctx.fillStyle = '#2196F3';
-  }
-  ctx.restore();
-
-  // 양자화
-  ctx.save();
-  ctx.strokeStyle = '#43A047';
-  ctx.fillStyle = '#43A047';
-  ctx.lineWidth = 2;
-  for (let i = 0; i < sampleCount; i++) {
-    const t = (i / (sampleCount - 1)) * duration;
-    const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
-    // 3비트(0~7) 양자화
-    const q = Math.round(((y + 1) / 2) * (quantizeLevels - 1));
-    const yq = (q / (quantizeLevels - 1)) * 2 - 1;
-    const cx = margin + (w * i) / (sampleCount - 1);
-    const cyq = margin + h / 2 - yq * (h / 2 * 0.85);
-    // 점
-    ctx.beginPath();
-    ctx.arc(cx, cyq, 6, 0, 2 * Math.PI);
-    ctx.fill();
-    // 값 표시
-    ctx.font = 'bold 13px Arial';
-    ctx.fillStyle = '#388E3C';
-    ctx.textAlign = 'center';
-    ctx.fillText(q.toString(), cx, cyq + 22);
-    ctx.fillStyle = '#43A047';
-    // 계단선(양자화 연결)
-    if (i > 0) {
-      const prevQ = Math.round(((Math.sin(2 * Math.PI * freq * ((i - 1) / (sampleCount - 1))) + 1) / 2) * (quantizeLevels - 1));
-      const prevYq = (prevQ / (quantizeLevels - 1)) * 2 - 1;
-      const prevCx = margin + (w * (i - 1)) / (sampleCount - 1);
-      const prevCyq = margin + h / 2 - prevYq * (h / 2 * 0.85);
-      ctx.beginPath();
-      ctx.moveTo(prevCx, prevCyq);
-      ctx.lineTo(cx, cyq);
-      ctx.stroke();
-    }
+    // 주기 라벨
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#333';
+    let tLabel = (i === 0) ? 'T' : `${i + 1}T`;
+    ctx.fillText(tLabel, cx, margin + h / 2 + 28);
   }
   ctx.restore();
 }
@@ -224,67 +189,67 @@ window.addEventListener('DOMContentLoaded', updateSamplingGraph);
 // 양자화 시각화 함수 개선
 function drawQuantization(audioData = null, isExample = false) {
   if (!quantizationCanvas || !quantizationCtx) return;
-
-  // 캔버스 크기 조정
   resizeCanvas(quantizationCanvas);
-
   const PADDING = 20;
   const GRAPH_HEIGHT = quantizationCanvas.height - (PADDING * 2);
-
   if (!audioData) {
     audioData = generateExampleSineData(44100, 1);
     isExample = true;
   }
-
   if (!audioData || audioData.length < 2) {
     drawGuideMessage(quantizationCtx, quantizationCanvas, '데이터 오류: 양자화 불가');
     return;
   }
-
   quantizationCtx.clearRect(0, 0, quantizationCanvas.width, quantizationCanvas.height);
-
   // 그리드 그리기
   quantizationCtx.strokeStyle = '#eee';
   quantizationCtx.lineWidth = 1;
-  quantizationCtx.beginPath();
   for (let i = 0; i <= 4; i++) {
     const y = PADDING + (i * GRAPH_HEIGHT / 4);
     quantizationCtx.moveTo(0, y);
     quantizationCtx.lineTo(quantizationCanvas.width, y);
   }
   quantizationCtx.stroke();
-
-  // 막대 그래프 (최대 10개)
-  const levels = 8;
-  const sampleInterval = Math.max(1, Math.floor(44100 / sampleRate));
-  const totalSamples = Math.max(2, Math.floor(audioData.length / sampleInterval));
-  const MAX_DISPLAY_SAMPLES = 10;
-  const displayStep = Math.max(1, Math.floor(totalSamples / MAX_DISPLAY_SAMPLES));
-  let displayCount = 0;
-  const barWidth = quantizationCanvas.width / Math.min(totalSamples, MAX_DISPLAY_SAMPLES);
-
-  for (let i = 0; i < totalSamples && displayCount < MAX_DISPLAY_SAMPLES; i += displayStep, displayCount++) {
-    const x = displayCount * barWidth;
+  // 막대 그래프 (표본화 주기만큼 모두 표시)
+  const sampleCount = parseInt(samplingSlider.value);
+  const sampleInterval = Math.max(1, Math.floor(audioData.length / sampleCount));
+  const totalSamples = sampleCount;
+  const barWidth = quantizationCanvas.width / totalSamples;
+  // 정규화용 min/max 계산
+  const N = 7; // 3비트(0~7)
+  const sampleValues = Array.from({length: totalSamples}, (_, k) => audioData[k * sampleInterval]);
+  const min = Math.min(...sampleValues);
+  const max = Math.max(...sampleValues);
+  for (let i = 0; i < totalSamples; i++) {
     const idx = i * sampleInterval;
     const value = audioData[idx];
-    const quantized = Math.round((value + 1) / 2 * (levels - 1));
+    // 0~N 정규화 후 반올림
+    const quantized = Math.round(((value - min) / (max - min)) * N);
+    const x = i * barWidth;
     const yBase = quantizationCanvas.height - PADDING;
-    const yTop = PADDING + ((1 - quantized / (levels - 1)) * GRAPH_HEIGHT);
-
+    const yTop = PADDING + ((N - quantized) / N) * GRAPH_HEIGHT;
     // 막대
-    quantizationCtx.fillStyle = '#2196F3';
+    quantizationCtx.fillStyle = '#222';
     quantizationCtx.fillRect(x + barWidth * 0.35, yTop, barWidth * 0.3, yBase - yTop);
-
     // 테두리
-    quantizationCtx.strokeStyle = '#1976D2';
+    quantizationCtx.strokeStyle = '#000';
     quantizationCtx.lineWidth = 1;
     quantizationCtx.strokeRect(x + barWidth * 0.35, yTop, barWidth * 0.3, yBase - yTop);
-
-    // 숫자
-    quantizationCtx.font = 'bold 12px Arial';
+    // 정수값(크게)
+    quantizationCtx.font = 'bold 16px Arial';
     quantizationCtx.fillStyle = '#222';
     quantizationCtx.textAlign = 'center';
     quantizationCtx.fillText(quantized.toString(), x + barWidth / 2, yTop - 5);
+    // 실수값(작게)
+    quantizationCtx.font = '12px Arial';
+    quantizationCtx.fillStyle = '#888';
+    quantizationCtx.fillText(value.toFixed(2), x + barWidth / 2, yTop - 22);
+    // 주기 라벨
+    quantizationCtx.font = '12px Arial';
+    quantizationCtx.fillStyle = '#333';
+    let tLabel = (i === 0) ? 'T' : `${i + 1}T`;
+    quantizationCtx.textAlign = 'center';
+    quantizationCtx.fillText(tLabel, x + barWidth / 2, yBase + 18);
   }
 }
 
@@ -299,17 +264,10 @@ function drawEncoding(audioData = null, isExample = false) {
     console.warn('[부호화] encodingCanvas 컨텍스트를 가져올 수 없습니다.');
     return;
   }
-
-  // 캔버스 크기 조정
   resizeCanvas(encodingCanvas);
-
   const PADDING = 20;
-  const ROW_HEIGHT = 40;
   const BINARY_WIDTH = 60;
-  // 샘플 개수: 슬라이더 값
   const sampleCount = parseInt(samplingSlider?.value || '8');
-
-  // 데이터가 없으면 안내 메시지 출력
   if (!audioData || audioData.length < 2) {
     encodingCtx.clearRect(0, 0, encodingCanvas.width, encodingCanvas.height);
     encodingCtx.font = 'bold 20px Arial';
@@ -319,76 +277,66 @@ function drawEncoding(audioData = null, isExample = false) {
     encodingCtx.fillText('부호화할 데이터가 없습니다.', encodingCanvas.width / 2, encodingCanvas.height / 2);
     return;
   }
-
   encodingCtx.clearRect(0, 0, encodingCanvas.width, encodingCanvas.height);
-
-  // 배경 그리드
-  encodingCtx.strokeStyle = '#eee';
-  encodingCtx.lineWidth = 1;
-  for (let i = 0; i <= sampleCount; i++) {
-    const x = PADDING + (i * (encodingCanvas.width - PADDING * 2) / sampleCount);
-    encodingCtx.beginPath();
-    encodingCtx.moveTo(x, PADDING);
-    encodingCtx.lineTo(x, encodingCanvas.height - PADDING);
-    encodingCtx.stroke();
-  }
-
   // 샘플링 포인트 계산
   const sampleInterval = Math.max(1, Math.floor(audioData.length / sampleCount));
-  const totalSamples = sampleCount;
-
+  // 정규화용 min/max 계산
+  const N = 7; // 3비트(0~7)
+  const sampleValues = Array.from({length: sampleCount}, (_, k) => audioData[k * sampleInterval]);
+  const min = Math.min(...sampleValues);
+  const max = Math.max(...sampleValues);
+  // 양자화된 정수값 배열
+  const quantizedArr = sampleValues.map(v => Math.round(((v - min) / (max - min)) * N));
+  // 비트 수 자동 결정
+  const bitLen = 3; // 0~7이므로 3비트 고정
   // 각 샘플의 부호화 정보 표시
-  for (let i = 0; i < totalSamples; i++) {
+  for (let i = 0; i < sampleCount; i++) {
     const idx = i * sampleInterval;
-    const x = PADDING + (i * (encodingCanvas.width - PADDING * 2) / (totalSamples - 1));
     const value = audioData[idx];
-
-    // 양자화 (3비트)
-    const quantized = Math.round((value + 1) / 2 * 7);
-    const binary = quantized.toString(2).padStart(3, '0');
-
+    const quantized = quantizedArr[i];
+    const binary = (quantized >>> 0).toString(2).padStart(bitLen, '0');
+    const x = PADDING + (i * (encodingCanvas.width - PADDING * 2) / (sampleCount - 1));
     // 샘플 번호
     encodingCtx.font = 'bold 12px Arial';
     encodingCtx.fillStyle = '#666';
     encodingCtx.textAlign = 'center';
     encodingCtx.fillText(`샘플 ${i + 1}`, x, PADDING - 5);
-
-    // 아날로그 값
-    encodingCtx.font = 'bold 14px Arial';
-    encodingCtx.fillStyle = '#1976D2';
-    encodingCtx.textAlign = 'center';
-    encodingCtx.fillText(value.toFixed(3), x, PADDING + 20);
-
-    // 양자화된 값
-    encodingCtx.font = 'bold 14px Arial';
-    encodingCtx.fillStyle = '#2196F3';
-    encodingCtx.fillText(quantized.toString(), x, PADDING + 40);
-
+    // 정수값
+    encodingCtx.font = 'bold 16px Arial';
+    encodingCtx.fillStyle = '#222';
+    encodingCtx.fillText(quantized.toString(), x, PADDING + 20);
     // 이진수 표시
     encodingCtx.font = '14px Courier New';
     encodingCtx.fillStyle = '#333';
-    for (let j = 0; j < 3; j++) {
+    for (let j = 0; j < bitLen; j++) {
       const bit = binary[j];
-      const bitX = x - BINARY_WIDTH / 2 + (j * BINARY_WIDTH / 3);
-      const bitY = PADDING + 60;
-
+      const bitX = x - BINARY_WIDTH / 2 + (j * BINARY_WIDTH / bitLen);
+      const bitY = PADDING + 50;
       // 비트 배경
       encodingCtx.fillStyle = bit === '1' ? '#E3F2FD' : '#F5F5F5';
-      encodingCtx.fillRect(bitX - 2, bitY - 15, BINARY_WIDTH / 3 - 2, 20);
-
+      encodingCtx.fillRect(bitX - 2, bitY - 15, BINARY_WIDTH / bitLen - 2, 20);
       // 비트 값
       encodingCtx.fillStyle = bit === '1' ? '#1976D2' : '#666';
       encodingCtx.textAlign = 'center';
-      encodingCtx.fillText(bit, bitX + BINARY_WIDTH / 6 - 2, bitY);
+      encodingCtx.fillText(bit, bitX + BINARY_WIDTH / (2 * bitLen) - 2, bitY);
     }
+    // 실수값(작게)
+    encodingCtx.font = '12px Arial';
+    encodingCtx.fillStyle = '#888';
+    encodingCtx.fillText(value.toFixed(2), x, PADDING + 70);
+    // 주기 라벨
+    encodingCtx.font = '12px Arial';
+    encodingCtx.fillStyle = '#333';
+    let tLabel = (i === 0) ? 'T' : `${i + 1}T`;
+    encodingCtx.textAlign = 'center';
+    encodingCtx.fillText(tLabel, x, PADDING + 90);
   }
-
-  // 범례 추가
+  // 범례
   const legendY = encodingCanvas.height - PADDING + 10;
   encodingCtx.font = '12px Arial';
   encodingCtx.fillStyle = '#666';
   encodingCtx.textAlign = 'left';
-  encodingCtx.fillText('아날로그 값 → 양자화 → 이진수 변환', PADDING, legendY);
+  encodingCtx.fillText('정수값(0~7) → 이진수 변환 (아래 작은 글씨: 원래 실수값)', PADDING, legendY);
 }
 
 // 파일 첨부 전 초기화
