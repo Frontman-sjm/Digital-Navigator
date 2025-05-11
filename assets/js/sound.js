@@ -115,7 +115,8 @@ const amplitude = 1; // 진폭
 const quantizeBits = 3; // 3비트 양자화
 const quantizeLevels = Math.pow(2, quantizeBits); // 8레벨
 
-function drawSamplingGraph(sampleCount) {
+// drawSamplingGraph: sampleCount, audioData(옵션) 인자로 받아 실제 데이터로 표본화 점을 그림
+function drawSamplingGraph(sampleCount, audioData = null) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const margin = 40;
   const w = canvas.width - margin * 2;
@@ -129,28 +130,38 @@ function drawSamplingGraph(sampleCount) {
   ctx.lineTo(margin + w, margin + h / 2);
   ctx.stroke();
   ctx.restore();
-  // 아날로그 곡선
-  ctx.save();
-  ctx.strokeStyle = '#1976D2';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (let px = 0; px <= w; px++) {
-    const t = (px / w) * duration;
-    const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
-    const cy = margin + h / 2 - y * (h / 2 * 0.85);
-    if (px === 0) ctx.moveTo(margin + px, cy);
-    else ctx.lineTo(margin + px, cy);
+  // 아날로그 곡선(예시 데이터만)
+  if (!audioData) {
+    ctx.save();
+    ctx.strokeStyle = '#1976D2';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let px = 0; px <= w; px++) {
+      const t = (px / w) * duration;
+      const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
+      const cy = margin + h / 2 - y * (h / 2 * 0.85);
+      if (px === 0) ctx.moveTo(margin + px, cy);
+      else ctx.lineTo(margin + px, cy);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
-  ctx.stroke();
-  ctx.restore();
   // 표본화(실수값) 점 및 주기 라벨
   ctx.save();
   ctx.strokeStyle = '#2196F3';
   ctx.fillStyle = '#2196F3';
   ctx.lineWidth = 1.5;
   for (let i = 0; i < sampleCount; i++) {
-    const t = (i / (sampleCount - 1)) * duration;
-    const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
+    let y;
+    if (audioData) {
+      // 실제 오디오 데이터 사용
+      const sampleInterval = Math.max(1, Math.floor(audioData.length / sampleCount));
+      y = audioData[i * sampleInterval];
+    } else {
+      // 예시 사인파
+      const t = (i / (sampleCount - 1)) * duration;
+      y = Math.sin(2 * Math.PI * freq * t) * amplitude;
+    }
     const cx = margin + (w * i) / (sampleCount - 1);
     const cy = margin + h / 2 - y * (h / 2 * 0.85);
     // 세로선
@@ -346,10 +357,10 @@ function drawAllGuides() {
   drawEncoding(null, true);
 }
 
-// 파일 첨부 시 단계별 시각화
+// 음악 파일 업로드 시 실제 오디오 데이터로 표본화 그래프 그리기
 function visualizeAll(audioBuffer) {
   const channelData = audioBuffer.getChannelData(0);
-  drawSamplingGraph(parseInt(samplingSlider?.value || '44'));
+  drawSamplingGraph(parseInt(samplingSlider?.value || '44'), channelData);
   drawQuantization(channelData, false);
   drawEncoding(channelData, false);
 }
@@ -591,7 +602,7 @@ function handleResize() {
       if (originalBuffer) {
         const channelData = originalBuffer.getChannelData(0);
         if (canvas.id === 'samplingCanvas') {
-          drawSamplingGraph(parseInt(samplingSlider?.value || '44'));
+          drawSamplingGraph(parseInt(samplingSlider?.value || '44'), channelData);
         } else if (canvas.id === 'quantizationCanvas') {
           drawQuantization(channelData, false);
         } else if (canvas.id === 'encodingCanvas') {
@@ -672,7 +683,7 @@ function enableControls(enabled) {
   });
 }
 
-// 샘플링 슬라이더와 오디오 처리 연동
+// 샘플링 슬라이더와 오디오 처리 연동 시에도 실제 데이터로 표본화 그래프 그리기
 function handleSamplingSliderChange() {
   if (!samplingSlider || !samplingValue) return;
   samplingValue.textContent = samplingSlider.value;
@@ -680,7 +691,10 @@ function handleSamplingSliderChange() {
   // 오디오 처리 및 시각화 동기화
   if (originalBuffer) {
     processedBuffer = processAudio(originalBuffer);
-    visualizeAll(originalBuffer);
+    const channelData = originalBuffer.getChannelData(0);
+    drawSamplingGraph(parseInt(samplingSlider.value), channelData);
+    drawQuantization(channelData, false);
+    drawEncoding(channelData, false);
     updateQualityMetrics(originalBuffer, processedBuffer);
   } else {
     // 예시 데이터로 시각화
