@@ -210,7 +210,7 @@
       <p class="file-info">지원 형식: WAV, MP3, OGG, M4A</p>
     </section>
     <section class="step">
-      <h2>소리의 디지털 표현 - 샘플링 & 양자화 시각화</h2>
+      <h2>1단계: 표본화 (Sampling)</h2>
       <div class="sampling-controls">
         <label for="samplingRateSlider"><strong>샘플링 주기(횟수):</strong> <span id="samplingRateValue">12</span></label>
         <input type="range" id="samplingRateSlider" min="1" max="12" value="12" step="1">
@@ -218,25 +218,33 @@
       <canvas id="samplingCanvas" width="900" height="320" style="width:100%;max-width:900px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
       <div class="sampling-guide">
         <ul>
-          <li>슬라이더를 움직이면 샘플링 주기가 바뀌며, 그래프가 실시간으로 갱신됩니다.</li>
-          <li>파란 점: 표본화(실수값), 초록 점: 양자화(정수값, 8비트)</li>
-          <li>각 점 위에 표본화값/양자화값이 표시됩니다.</li>
+          <li>슬라이더를 움직이면 표본화(샘플링) 주기가 바뀌며, 그래프가 실시간으로 갱신됩니다.</li>
+          <li>파란 점: 표본화(실수값)만 표시됩니다.</li>
+          <li>각 점 위에 표본화값이 표시됩니다.</li>
         </ul>
+        <p style="margin-top:1rem;color:#1976D2;font-weight:bold;">※ 표본화란? 연속적인 아날로그 신호에서 일정한 시간 간격으로 값을 뽑아내는 과정입니다.</p>
       </div>
     </section>
     <section class="step">
       <h2>2단계: 양자화 (Quantization)</h2>
-      <p>표본화된 각 점의 진폭을 이산적인 값으로 변환합니다. CD 품질의 오디오는 16비트 양자화를 사용합니다.</p>
+      <p>표본화된 실수값을 가장 가까운 정수(0~7, 3비트)로 변환하는 과정입니다.</p>
       <div class="controls">
-        <p class="quantization-info">양자화 비트 수: 16비트 (CD 품질)</p>
+        <p class="quantization-info">양자화 비트 수: 3비트 (0~7)</p>
       </div>
       <div class="canvas-container">
         <canvas id="quantizationCanvas"></canvas>
       </div>
+      <div class="sampling-guide">
+        <ul>
+          <li>파란 점: 표본화(실수값), 검은 막대: 양자화(정수값, 0~7)</li>
+          <li>각 막대 위에 양자화 값이 표시됩니다.</li>
+        </ul>
+        <p style="margin-top:1rem;color:#388E3C;font-weight:bold;">※ 양자화란? 표본화된 값을 정해진 레벨(여기선 8단계)로 반올림하는 과정입니다.</p>
+      </div>
     </section>
     <section class="step">
       <h2>3단계: 부호화 (Encoding)</h2>
-      <p>양자화된 값을 이진수로 변환하여 저장합니다.</p>
+      <p>양자화된 값을 3비트 이진수로 변환하여 저장하는 과정입니다.</p>
       <div class="audio-controls">
         <div class="playback-controls">
           <button id="playOriginal" class="control-btn">원본 재생</button>
@@ -255,6 +263,12 @@
       </div>
       <div class="canvas-container">
         <canvas id="encodingCanvas"></canvas>
+      </div>
+      <div class="sampling-guide">
+        <ul>
+          <li>정수값(0~7)과 3비트 이진수가 나란히 표시됩니다.</li>
+        </ul>
+        <p style="margin-top:1rem;color:#1976D2;font-weight:bold;">※ 부호화란? 양자화된 값을 2진수로 바꿔 디지털로 저장하는 과정입니다.</p>
       </div>
     </section>
   </main>
