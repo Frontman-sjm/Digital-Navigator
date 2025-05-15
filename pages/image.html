@@ -13,6 +13,7 @@
       <ul>
         <li><a href="../index.html">홈</a></li>
         <li><a href="binary.html">이진수란?</a></li>
+        <li><a href="bit.html">비트란?</a></li>
         <li><a href="text.html">문자의 디지털 표현</a></li>
         <li><a href="image.html">그림의 디지털 표현</a></li>
         <li><a href="sound.html">소리의 디지털 표현</a></li>
@@ -22,6 +23,46 @@
   </header>
 
   <main>
+    <section>
+      <h2>픽셀 복원 챌린지</h2>
+      <p>이름 또는 이미지를 픽셀화하고 해상도에 따른 정보 손실을 체험해 보세요.</p>
+
+      <div class="pixel-restoration-challenge">
+        <div class="challenge-controls">
+          <div class="input-group">
+            <label for="nameInput">📝 내용을 입력하세요:</label>
+            <input type="text" id="nameInput" placeholder="예: 홍길동 or Alice">
+            <button onclick="renderName()">이름 이미지 생성</button>
+          </div>
+
+          <div class="input-group">
+            <label for="imgUpload">🖼 이미지 업로드:</label>
+            <input type="file" id="imgUpload" accept="image/*">
+          </div>
+
+          <div class="input-group">
+            <label for="resolution">해상도 선택:</label>
+            <select id="resolution">
+              <option value="8">8 x 6</option>
+              <option value="16">16 x 12</option>
+              <option value="32">32 x 24</option>
+              <option value="64">64 x 48</option>
+              <option value="128">128 x 96</option>
+              <option value="256">256 x 192</option>
+              <option value="400">400 x 300</option>
+              <option value="800" selected>800 x 600</option>
+            </select>
+            <button onclick="applyResolution()">해상도 적용</button>
+            <button onclick="downloadImage()">이미지 저장</button>
+          </div>
+        </div>
+
+        <div class="challenge-area">
+          <canvas id="pixelCanvas" width="800" height="600"></canvas>
+        </div>
+      </div>
+    </section>
+
     <section>
       <h2>RGB 색상 모델</h2>
       <p>여러 색상 팔레트에서 색을 선택하고 픽셀을 클릭하여 그림을 그려보세요!</p>
@@ -78,5 +119,6 @@
   </main>
 
   <script src="../assets/js/image.js"></script>
+  <script src="../assets/js/pixel-challenge.js"></script>
 </body>
 </html>

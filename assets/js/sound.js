@@ -132,19 +132,19 @@ function drawSamplingGraph(sampleCount, audioData = null) {
   ctx.restore();
   // 아날로그 곡선(예시 데이터만)
   if (!audioData) {
-    ctx.save();
-    ctx.strokeStyle = '#1976D2';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let px = 0; px <= w; px++) {
-      const t = (px / w) * duration;
-      const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
-      const cy = margin + h / 2 - y * (h / 2 * 0.85);
-      if (px === 0) ctx.moveTo(margin + px, cy);
-      else ctx.lineTo(margin + px, cy);
-    }
-    ctx.stroke();
-    ctx.restore();
+  ctx.save();
+  ctx.strokeStyle = '#1976D2';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let px = 0; px <= w; px++) {
+    const t = (px / w) * duration;
+    const y = Math.sin(2 * Math.PI * freq * t) * amplitude;
+    const cy = margin + h / 2 - y * (h / 2 * 0.85);
+    if (px === 0) ctx.moveTo(margin + px, cy);
+    else ctx.lineTo(margin + px, cy);
+  }
+  ctx.stroke();
+  ctx.restore();
   }
   // 표본화(실수값) 점 및 주기 라벨
   ctx.save();
@@ -159,7 +159,7 @@ function drawSamplingGraph(sampleCount, audioData = null) {
       y = audioData[i * sampleInterval];
     } else {
       // 예시 사인파
-      const t = (i / (sampleCount - 1)) * duration;
+    const t = (i / (sampleCount - 1)) * duration;
       y = Math.sin(2 * Math.PI * freq * t) * amplitude;
     }
     const cx = margin + (w * i) / (sampleCount - 1);
