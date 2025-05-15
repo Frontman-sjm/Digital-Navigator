@@ -331,8 +331,16 @@ class BingoGame {
     if (char) {
       const code = char.charCodeAt(0);
       if (code >= 32 && code <= 126) {
-        // 중복 체크
-        if (this.usedChars.has(char)) {
+        // 현재 입력하려는 문자가 다른 셀에서 사용 중인지 확인
+        const isUsedInOtherCell = Array.from(this.usedChars).some(usedChar => 
+          usedChar === char && this.currentBoard.some((boardRow, r) => 
+            boardRow.some((boardChar, c) => 
+              boardChar === char && (r !== row || c !== col)
+            )
+          )
+        );
+
+        if (isUsedInOtherCell) {
           input.value = '';
           asciiDiv.textContent = '';
           this.currentBoard[row][col] = null;
