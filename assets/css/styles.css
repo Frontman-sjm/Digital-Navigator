@@ -3271,3 +3271,155 @@ canvas {
   font-size: 1.2rem;
   color: #2c3e50;
 }
+
+/* 픽셀 복원 챌린지 스타일 */
+.pixel-challenge-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-description {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.pixel-restoration-challenge {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.control-panel {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input-wrapper input[type="text"],
+.input-wrapper select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 200px;
+  flex: 1;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-input-label {
+  padding: 0.75rem 1.5rem;
+  background: #e9ecef;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.file-input-label:hover {
+  background: #dee2e6;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primary-button {
+  background: #007bff;
+  color: white;
+}
+
+.primary-button:hover {
+  background: #0056b3;
+}
+
+.secondary-button {
+  background: #6c757d;
+  color: white;
+}
+
+.secondary-button:hover {
+  background: #545b62;
+}
+
+.canvas-container {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  max-width: 100%;
+}
+
+#pixelCanvas {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .pixel-challenge-section {
+    padding: 1rem;
+  }
+
+  .input-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input-wrapper input[type="text"],
+  .input-wrapper select {
+    width: 100%;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+}
