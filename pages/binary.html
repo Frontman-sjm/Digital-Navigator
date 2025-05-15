@@ -5,6 +5,147 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>이진수란?</title>
   <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    .input-guide {
+      background-color: #f8f9fa;
+      border-left: 4px solid #007bff;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    .binary-representation {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      background-color: #e9ecef;
+      border-radius: 4px;
+    }
+
+    .step {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .step-input {
+      width: 80px;
+      padding: 0.25rem;
+      margin-left: 0.5rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+    }
+
+    .step-input.correct {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+
+    .step-input.incorrect {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+
+    .result {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .converter-box {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .bit-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .bit {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e9ecef;
+      border: 2px solid #ced4da;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .bit:hover {
+      background-color: #dee2e6;
+    }
+
+    .bit.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #0056b3;
+    }
+
+    .bit.incorrect {
+      background-color: #dc3545;
+      color: white;
+      border-color: #bd2130;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .primary-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .primary-button:hover {
+      background-color: #0056b3;
+    }
+
+    .secondary-button {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .secondary-button:hover {
+      background-color: #545b62;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -102,8 +243,216 @@
         </div>
       </div>
     </div>
+
+    <section>
+      <h2>이진수 변환 게임</h2>
+      <p>이진수를 십진수로 변환하는 과정을 단계별로 학습해보세요!</p>
+      
+      <div id="weightExplanation" class="input-guide">
+        <strong>2진수의 가중치란?</strong><br>
+        2진수의 각 자리에는 <strong>2의 거듭제곱</strong>이 가중치로 적용됩니다.<br>
+        예를 들어, <strong>1011</strong>은 다음처럼 계산합니다:<br>
+        <code>1×2³ + 0×2² + 1×2¹ + 1×2⁰ = 8 + 0 + 2 + 1 = 11</code><br>
+        각 자리의 가중치를 잘 살펴보세요!
+      </div>
+
+      <div id="binaryDisplay" class="binary-representation"></div>
+      <div id="stepsContainer"></div>
+      
+      <div class="button-group">
+        <button class="primary-button" onclick="checkAnswers()">제출</button>
+        <button class="secondary-button" onclick="createGame()">새 게임</button>
+      </div>
+
+      <div id="finalResult" class="result"></div>
+
+      <div class="converter-box">
+        <h3>📝 직접 2진수 입력 → 10진수 변환</h3>
+        <div class="input-group">
+          <label for="customBinaryInput">2진수 입력:</label>
+          <div class="input-wrapper">
+            <input type="text" id="customBinaryInput" placeholder="예: 1011">
+            <button class="primary-button" onclick="convertCustomBinary()">변환</button>
+          </div>
+        </div>
+        <div id="customBinaryResult" class="result"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>자리값으로 2진수 만들기</h2>
+      <p>2진수로 변환하고 싶은 10진수를 입력하고, 자리값을 클릭하여 2진수를 만들어보세요!</p>
+      
+      <div class="converter-box">
+        <div class="input-group">
+          <label for="decimalInput">10진수 입력 (1-1023):</label>
+          <div class="input-wrapper">
+            <input type="number" id="decimalInput" placeholder="예: 25" min="1" max="1023">
+            <button class="primary-button" onclick="createBits()">자리값 생성</button>
+          </div>
+        </div>
+
+        <div id="bitBox" class="bit-box"></div>
+        <div id="sumDisplay" class="result"></div>
+        <div class="button-group">
+          <button class="primary-button" onclick="checkAnswer()">제출</button>
+        </div>
+        <div id="feedback" class="result"></div>
+      </div>
+    </section>
   </main>
 
   <script src="../assets/js/binary.js"></script>
+  <script>
+    // 이진수 변환 게임
+    let binaryStr = "";
+    let steps = [];
+
+    function createGame() {
+      steps = [];
+      document.getElementById("finalResult").innerText = "";
+      
+      const length = Math.floor(Math.random() * 4) + 3;
+      binaryStr = "";
+      for (let i = 0; i < length; i++) {
+        binaryStr += Math.random() < 0.5 ? "0" : "1";
+      }
+      if (binaryStr[0] === "0") binaryStr = "1" + binaryStr.slice(1);
+      
+      document.getElementById("binaryDisplay").innerText = `2진수 값: ${binaryStr}`;
+      
+      const container = document.getElementById("stepsContainer");
+      container.innerHTML = "";
+      const n = binaryStr.length;
+      for (let i = 0; i < n; i++) {
+        const exponent = n - 1 - i;
+        const bit = binaryStr[i];
+        const expected = parseInt(bit) * Math.pow(2, exponent);
+
+        const stepDiv = document.createElement("div");
+        stepDiv.className = "step";
+
+        const label = document.createElement("span");
+        label.innerHTML = `2<sup>${exponent}</sup> × ${bit} = `;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "step-input";
+        input.placeholder = "?";
+
+        steps.push({ exponent, bit, expected, inputElement: input });
+        stepDiv.appendChild(label);
+        stepDiv.appendChild(input);
+        container.appendChild(stepDiv);
+      }
+    }
+
+    function checkAnswers() {
+      let isAllCorrect = true;
+      let total = 0;
+      
+      steps.forEach(step => {
+        const userAnswer = parseInt(step.inputElement.value);
+        step.inputElement.classList.remove("correct", "incorrect");
+
+        if (userAnswer === step.expected) {
+          step.inputElement.classList.add("correct");
+        } else {
+          step.inputElement.classList.add("incorrect");
+          isAllCorrect = false;
+        }
+        total += step.expected;
+      });
+
+      const resultDiv = document.getElementById("finalResult");
+      resultDiv.innerText = isAllCorrect 
+        ? `✅ 모든 단계 정답! 최종 10진수 값은 ${total}입니다.` 
+        : `❌ 일부 단계가 틀렸습니다. 최종 10진수 값은 ${total}입니다.`;
+    }
+
+    function convertCustomBinary() {
+      const input = document.getElementById("customBinaryInput").value.trim();
+      const resultDiv = document.getElementById("customBinaryResult");
+
+      if (!/^[01]+$/.test(input)) {
+        resultDiv.innerText = "⚠️ 올바른 2진수(0과 1만)를 입력하세요.";
+        return;
+      }
+
+      const decimalValue = parseInt(input, 2);
+      resultDiv.innerText = `🔄 2진수 ${input} = 10진수 ${decimalValue}`;
+    }
+
+    // 자리값 게임
+    let decimal = 0;
+    let bits = [];
+
+    function createBits() {
+      const input = document.getElementById("decimalInput").value;
+      decimal = parseInt(input);
+      if (isNaN(decimal) || decimal < 1) {
+        alert("1 이상의 숫자를 입력하세요.");
+        return;
+      }
+
+      bits = [];
+      const bitBox = document.getElementById("bitBox");
+      bitBox.innerHTML = "";
+
+      const maxPower = Math.floor(Math.log2(decimal));
+      for (let i = maxPower; i >= 0; i--) {
+        const value = 2 ** i;
+        const div = document.createElement("div");
+        div.className = "bit";
+        div.innerText = `2^${i}\n(0)`;
+        div.onclick = () => toggleBit(div, i);
+        bitBox.appendChild(div);
+        bits.push({ element: div, active: false, value, power: i });
+      }
+
+      updateSum();
+      document.getElementById("feedback").innerText = "";
+    }
+
+    function toggleBit(div, power) {
+      const bit = bits.find(b => b.element === div);
+      bit.active = !bit.active;
+      div.classList.toggle("active", bit.active);
+      div.classList.remove("incorrect");
+      div.innerText = `2^${power}\n(${bit.active ? 1 : 0})`;
+      updateSum();
+    }
+
+    function updateSum() {
+      const sum = bits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
+      document.getElementById("sumDisplay").innerText = `현재 값의 합: ${sum}`;
+    }
+
+    function checkAnswer() {
+      const correctBinary = decimal.toString(2).padStart(bits.length, '0');
+
+      bits.forEach((bit, idx) => {
+        const expected = correctBinary[idx] === '1';
+        const user = bit.active;
+
+        if (user !== expected) {
+          bit.element.classList.add("incorrect");
+        } else {
+          bit.element.classList.remove("incorrect");
+        }
+      });
+
+      const total = bits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
+      const feedback = document.getElementById("feedback");
+      if (total === decimal) {
+        feedback.innerText = `✅ 정답입니다!`;
+      } else {
+        feedback.innerText = `❌ 오답입니다. 목표: ${decimal}, 현재: ${total}`;
+      }
+    }
+
+    // 초기 게임 생성
+    createGame();
+  </script>
 </body>
 </html>
