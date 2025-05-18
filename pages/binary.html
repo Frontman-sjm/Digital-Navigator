@@ -285,19 +285,20 @@
       
       <div class="converter-box">
         <div class="input-group">
-          <label for="decimalInput">10진수 입력 (1-1023):</label>
+          <label for="placeValueInput">10진수 입력 (1-1023):</label>
           <div class="input-wrapper">
-            <input type="number" id="decimalInput" placeholder="예: 25" min="1" max="1023">
-            <button class="primary-button" onclick="createBits()">자리값 생성</button>
+            <input type="number" id="placeValueInput" placeholder="예: 25" min="1" max="1023">
+            <button class="primary-button" onclick="createPlaceValueBits()">자리값 생성</button>
           </div>
         </div>
 
-        <div id="bitBox" class="bit-box"></div>
-        <div id="sumDisplay" class="result"></div>
+        <div id="placeValueBitBox" class="bit-box"></div>
+        <div id="placeValueSumDisplay" class="result"></div>
         <div class="button-group">
-          <button class="primary-button" onclick="checkAnswer()">제출</button>
+          <button class="primary-button" onclick="checkPlaceValueAnswer()">제출</button>
+          <button class="secondary-button" onclick="resetPlaceValueGame()">초기화</button>
         </div>
-        <div id="feedback" class="result"></div>
+        <div id="placeValueFeedback" class="result"></div>
       </div>
     </section>
   </main>
@@ -384,71 +385,90 @@
     }
 
     // 자리값 게임
-    let decimal = 0;
-    let bits = [];
+    let placeValueDecimal = 0;
+    let placeValueBits = [];
 
-    function createBits() {
-      const input = document.getElementById("decimalInput").value;
-      decimal = parseInt(input);
-      if (isNaN(decimal) || decimal < 1) {
-        alert("1 이상의 숫자를 입력하세요.");
+    function createPlaceValueBits() {
+      const input = document.getElementById("placeValueInput").value;
+      placeValueDecimal = parseInt(input);
+      
+      if (isNaN(placeValueDecimal) || placeValueDecimal < 1 || placeValueDecimal > 1023) {
+        alert("1부터 1023 사이의 숫자를 입력하세요.");
         return;
       }
 
-      bits = [];
-      const bitBox = document.getElementById("bitBox");
+      placeValueBits = [];
+      const bitBox = document.getElementById("placeValueBitBox");
       bitBox.innerHTML = "";
 
-      const maxPower = Math.floor(Math.log2(decimal));
+      // 필요한 비트 수 계산 (2의 거듭제곱으로 표현하기 위한 최소 비트 수)
+      const maxPower = Math.floor(Math.log2(placeValueDecimal));
+      
+      // 각 자리값 생성
       for (let i = maxPower; i >= 0; i--) {
-        const value = 2 ** i;
+        const value = Math.pow(2, i);
         const div = document.createElement("div");
         div.className = "bit";
         div.innerText = `2^${i}\n(0)`;
-        div.onclick = () => toggleBit(div, i);
+        div.onclick = () => togglePlaceValueBit(div, i);
         bitBox.appendChild(div);
-        bits.push({ element: div, active: false, value, power: i });
+        placeValueBits.push({ element: div, active: false, value, power: i });
       }
 
-      updateSum();
-      document.getElementById("feedback").innerText = "";
+      updatePlaceValueSum();
+      document.getElementById("placeValueFeedback").innerText = "";
     }
 
-    function toggleBit(div, power) {
-      const bit = bits.find(b => b.element === div);
+    function togglePlaceValueBit(div, power) {
+      const bit = placeValueBits.find(b => b.element === div);
       bit.active = !bit.active;
       div.classList.toggle("active", bit.active);
       div.classList.remove("incorrect");
       div.innerText = `2^${power}\n(${bit.active ? 1 : 0})`;
-      updateSum();
+      updatePlaceValueSum();
+      document.getElementById("placeValueFeedback").innerText = "";
     }
 
-    function updateSum() {
-      const sum = bits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
-      document.getElementById("sumDisplay").innerText = `현재 값의 합: ${sum}`;
+    function updatePlaceValueSum() {
+      const sum = placeValueBits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
+      document.getElementById("placeValueSumDisplay").innerText = `현재 값의 합: ${sum}`;
     }
 
-    function checkAnswer() {
-      const correctBinary = decimal.toString(2).padStart(bits.length, '0');
+    function checkPlaceValueAnswer() {
+      const correctBinary = placeValueDecimal.toString(2).padStart(placeValueBits.length, '0');
+      let isCorrect = true;
 
-      bits.forEach((bit, idx) => {
+      placeValueBits.forEach((bit, idx) => {
         const expected = correctBinary[idx] === '1';
         const user = bit.active;
 
         if (user !== expected) {
           bit.element.classList.add("incorrect");
+          isCorrect = false;
         } else {
           bit.element.classList.remove("incorrect");
         }
       });
 
-      const total = bits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
-      const feedback = document.getElementById("feedback");
-      if (total === decimal) {
+      const total = placeValueBits.reduce((acc, b) => acc + (b.active ? b.value : 0), 0);
+      const feedback = document.getElementById("placeValueFeedback");
+      
+      if (isCorrect) {
         feedback.innerText = `✅ 정답입니다!`;
+        feedback.style.color = "#28a745";
       } else {
-        feedback.innerText = `❌ 오답입니다. 목표: ${decimal}, 현재: ${total}`;
+        feedback.innerText = `❌ 오답입니다. 목표: ${placeValueDecimal}, 현재: ${total}`;
+        feedback.style.color = "#dc3545";
       }
+    }
+
+    function resetPlaceValueGame() {
+      placeValueDecimal = 0;
+      placeValueBits = [];
+      document.getElementById("placeValueInput").value = "";
+      document.getElementById("placeValueBitBox").innerHTML = "";
+      document.getElementById("placeValueSumDisplay").innerText = "";
+      document.getElementById("placeValueFeedback").innerText = "";
     }
 
     // 초기 게임 생성
