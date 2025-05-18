@@ -179,32 +179,6 @@
     </section>
 
     <section>
-      <div class="binary-converter">
-        <div class="converter-box">
-          <h3>이진수 변환기</h3>
-          <p>이진수는 컴퓨터가 정보를 표현하는 가장 기본적인 방식입니다. 0과 1만을 사용하여 모든 숫자를 표현할 수 있으며, 각 자리의 위치에 따라 값이 달라집니다.</p>
-          <p>10진수를 2진수로 변환해보세요. 0부터 255까지의 숫자를 입력하면 8비트 이진수로 변환됩니다.</p>
-          <div class="input-guide">
-            <strong>사용 방법</strong><br>
-            <ul>
-              <li>0부터 255 사이의 숫자를 입력하세요</li>
-              <li>변환하기 버튼을 클릭하면 8비트 이진수로 변환됩니다</li>
-              <li>각 자리의 위치와 값을 확인할 수 있습니다</li>
-            </ul>
-          </div>
-          <div class="input-group">
-            <label for="decimalInput">10진수 입력 (0-255):</label>
-            <div class="input-wrapper">
-              <input type="number" id="decimalInput" min="0" max="255" placeholder="0-255 사이의 숫자를 입력하세요">
-              <button onclick="convertToBinary()">변환하기</button>
-            </div>
-          </div>
-          <div class="result" id="binaryResult">이진수 결과가 여기에 표시됩니다</div>
-        </div>
-      </div>
-    </section>
-
-    <section>
       <h2>이진수 퀴즈</h2>
       <p>이진수를 십진수로 변환하는 퀴즈를 풀어보세요!</p>
       <div class="quiz-section">
@@ -265,18 +239,6 @@
       </div>
 
       <div id="finalResult" class="result"></div>
-
-      <div class="converter-box">
-        <h3>📝 직접 2진수 입력 → 10진수 변환</h3>
-        <div class="input-group">
-          <label for="customBinaryInput">2진수 입력:</label>
-          <div class="input-wrapper">
-            <input type="text" id="customBinaryInput" placeholder="예: 1011">
-            <button class="primary-button" onclick="convertCustomBinary()">변환</button>
-          </div>
-        </div>
-        <div id="customBinaryResult" class="result"></div>
-      </div>
     </section>
 
     <section>
@@ -369,19 +331,6 @@
       resultDiv.innerText = isAllCorrect 
         ? `✅ 모든 단계 정답! 최종 10진수 값은 ${total}입니다.` 
         : `❌ 일부 단계가 틀렸습니다. 최종 10진수 값은 ${total}입니다.`;
-    }
-
-    function convertCustomBinary() {
-      const input = document.getElementById("customBinaryInput").value.trim();
-      const resultDiv = document.getElementById("customBinaryResult");
-
-      if (!/^[01]+$/.test(input)) {
-        resultDiv.innerText = "⚠️ 올바른 2진수(0과 1만)를 입력하세요.";
-        return;
-      }
-
-      const decimalValue = parseInt(input, 2);
-      resultDiv.innerText = `🔄 2진수 ${input} = 10진수 ${decimalValue}`;
     }
 
     // 자리값 게임
