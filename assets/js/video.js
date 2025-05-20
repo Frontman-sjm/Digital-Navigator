@@ -7,23 +7,25 @@ const frameSpeed = document.getElementById('frameSpeed');
 const frameSpeedValue = document.getElementById('frameSpeedValue');
 const frameCanvas = document.getElementById('frameCanvas');
 const ctx = frameCanvas.getContext('2d');
+const MAX_FRAMES = 50; // 최대 프레임 수를 50으로 증가
 
-let frameImages = [];
-let frameIndex = 0;
-let playing = false;
-let timer = null;
+let frames = [];
+let currentFrame = 0;
+let isPlaying = false;
+let animationId = null;
+let gif = null;
 
 function resetPlayer() {
-  frameIndex = 0;
-  playing = false;
-  clearInterval(timer);
+  currentFrame = 0;
+  isPlaying = false;
+  clearInterval(animationId);
   playBtn.disabled = false;
   pauseBtn.disabled = true;
 }
 
 function updateThumbnails() {
   frameThumbnails.innerHTML = '';
-  frameImages.forEach((img, idx) => {
+  frames.forEach((img, idx) => {
     const thumb = document.createElement('img');
     thumb.src = img.src;
     thumb.title = `프레임 ${idx + 1}`;
@@ -33,9 +35,9 @@ function updateThumbnails() {
 
 function drawFrame(idx) {
   ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-  if (!frameImages[idx]) return;
+  if (!frames[idx]) return;
   // 이미지 비율 유지하여 중앙에 그림
-  const img = frameImages[idx];
+  const img = frames[idx];
   const canvasW = frameCanvas.width;
   const canvasH = frameCanvas.height;
   const ratio = Math.min(canvasW / img.width, canvasH / img.height);
@@ -47,55 +49,111 @@ function drawFrame(idx) {
 }
 
 function playAnimation() {
-  if (frameImages.length === 0) return;
-  playing = true;
+  if (frames.length === 0) return;
+  isPlaying = true;
   playBtn.disabled = true;
   pauseBtn.disabled = false;
-  timer = setInterval(() => {
-    drawFrame(frameIndex);
-    frameIndex = (frameIndex + 1) % frameImages.length;
+  animationId = setInterval(() => {
+    drawFrame(currentFrame);
+    currentFrame = (currentFrame + 1) % frames.length;
   }, 1000 / parseInt(frameSpeed.value));
 }
 
 function pauseAnimation() {
-  playing = false;
+  isPlaying = false;
   playBtn.disabled = false;
   pauseBtn.disabled = true;
-  clearInterval(timer);
+  clearInterval(animationId);
 }
 
-frameFilesInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files).slice(0, 20); // 최대 20장
-  frameImages = [];
-  if (files.length === 0) {
-    ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-    updateThumbnails();
-    resetPlayer();
-    return;
+// GIF 저장 기능 추가
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  if (frames.length === 0) return;
+  
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'GIF 생성 중...';
+  
+  try {
+    const canvas = document.getElementById('frameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // GIF 생성
+    gif = new GIF({
+      workers: 2,
+      quality: 10,
+      width: canvas.width,
+      height: canvas.height
+    });
+    
+    // 각 프레임을 GIF에 추가
+    for (let i = 0; i < frames.length; i++) {
+      ctx.drawImage(frames[i], 0, 0, canvas.width, canvas.height);
+      gif.addFrame(ctx, {copy: true, delay: 1000 / document.getElementById('frameSpeed').value});
+    }
+    
+    // GIF 렌더링
+    gif.on('finished', function(blob) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'animation.gif';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'GIF 저장';
+    });
+    
+    gif.render();
+  } catch (error) {
+    console.error('GIF 생성 중 오류 발생:', error);
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'GIF 저장';
   }
-  let loaded = 0;
-  files.forEach((file, idx) => {
+});
+
+// 프레임 업로드 핸들러 수정
+document.getElementById('frameFiles').addEventListener('change', function(e) {
+  const files = Array.from(e.target.files).slice(0, MAX_FRAMES);
+  frames = [];
+  currentFrame = 0;
+  
+  const thumbnails = document.getElementById('frameThumbnails');
+  thumbnails.innerHTML = '';
+  
+  files.forEach((file, index) => {
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = function(e) {
       const img = new Image();
-      img.onload = () => {
-        frameImages[idx] = img;
-        loaded++;
-        if (loaded === files.length) {
-          updateThumbnails();
-          drawFrame(0);
-          resetPlayer();
+      img.onload = function() {
+        frames.push(img);
+        
+        // 썸네일 생성
+        const thumbnail = document.createElement('div');
+        thumbnail.className = 'frame-thumbnail';
+        thumbnail.innerHTML = `
+          <img src="${e.target.result}" alt="Frame ${index + 1}" />
+          <span>${index + 1}</span>
+        `;
+        thumbnails.appendChild(thumbnail);
+        
+        // 모든 프레임이 로드되면 저장 버튼 활성화
+        if (frames.length === files.length) {
+          document.getElementById('saveBtn').disabled = false;
         }
       };
-      img.src = ev.target.result;
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
 });
 
 playBtn.addEventListener('click', () => {
-  if (frameImages.length === 0) return;
-  if (!playing) {
+  if (frames.length === 0) return;
+  if (!isPlaying) {
     playAnimation();
   }
 });
@@ -104,7 +162,7 @@ pauseBtn.addEventListener('click', () => {
 });
 frameSpeed.addEventListener('input', () => {
   frameSpeedValue.textContent = frameSpeed.value;
-  if (playing) {
+  if (isPlaying) {
     pauseAnimation();
     playAnimation();
   }
