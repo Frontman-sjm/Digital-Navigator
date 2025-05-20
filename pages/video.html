@@ -33,14 +33,15 @@
     <section>
       <h2>프레임 애니메이션 체험</h2>
       <div class="video-frame-controls">
-        <label for="frameFiles"><strong>프레임 이미지 업로드 (최대 20장):</strong></label>
+        <label for="frameFiles"><strong>프레임 이미지 업로드 (최대 50장):</strong></label>
         <input type="file" id="frameFiles" accept="image/*" multiple />
         <div class="frame-thumbnails" id="frameThumbnails"></div>
         <div class="frame-player-controls">
           <button id="playBtn">재생</button>
           <button id="pauseBtn" disabled>일시정지</button>
-          <label for="frameSpeed">프레임 속도: <span id="frameSpeedValue">5</span> fps</label>
-          <input type="range" id="frameSpeed" min="1" max="20" value="5" />
+          <button id="saveBtn" disabled>GIF 저장</button>
+          <label for="frameSpeed">프레임 속도: <span id="frameSpeedValue">30</span> fps</label>
+          <input type="range" id="frameSpeed" min="1" max="60" value="30" />
         </div>
       </div>
       <div class="frame-canvas-container">
@@ -48,7 +49,8 @@
       </div>
       <div class="input-guide" style="margin-top:1rem;">
         여러 장의 이미지를 업로드한 뒤, 재생 버튼을 눌러보세요!<br>
-        프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.
+        프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.<br>
+        GIF 저장 버튼을 눌러 애니메이션을 저장할 수 있습니다.
       </div>
     </section>
   </main>
