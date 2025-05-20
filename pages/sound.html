@@ -200,22 +200,25 @@
   </header>
 
   <main>
-    <section class="file-upload-section" style="margin-bottom:2rem;">
-      <h2>오디오 파일 업로드</h2>
-      <input type="file" id="audioFile" accept="audio/*,audio/mp3,.mp3,.wav,.ogg" />
-      <div class="upload-progress">
-        <div class="progress-bar"></div>
-        <span class="progress-text">0%</span>
-      </div>
-      <p class="file-info">지원 형식: WAV, MP3, OGG, M4A</p>
+    <section class="step">
+      <h2>소리의 디지털화</h2>
+      <p>
+        소리는 연속적인 파동(아날로그 신호)으로, 이를 컴퓨터가 이해할 수 있는 디지털 신호로 변환하는 과정이 필요합니다.<br>
+        이 과정은 크게 세 단계로 나뉩니다:<br>
+        1. <strong>표본화(Sampling)</strong>: 연속적인 소리 파형을 일정한 시간 간격으로 나누어 측정<br>
+        2. <strong>양자화(Quantization)</strong>: 측정된 값을 특정 범위의 숫자로 표현<br>
+        3. <strong>부호화(Encoding)</strong>: 숫자를 0과 1의 비트로 변환<br>
+        이 과정을 통해 우리는 소리를 디지털로 저장하고 재생할 수 있게 됩니다.
+      </p>
     </section>
+
     <section class="step">
       <h2>1단계: 표본화 (Sampling)</h2>
-          <p>
-            <strong>표본화</strong>란? 아날로그 소리 파형을 일정한 시간 간격으로 나누어 소리의 강도를 측정해서 샘플을 추출하는 과정입니다. 이 때, 이 일정한 시간 간격에 따라 소리의 강도를 측정하는 것을 <strong>주기</strong>라고 합니다.<br>
-            주기의 횟수가 너무 적으면 원래 소리를 제대로 재현해내지 못하며, 주기의 횟수가 너무 많으면 정확한 소리를 측정할 수 있지만 용량이 너무 커집니다.<br>
-            예시 : CD 오디오는 1초에 44,100번 표본화(44.1kHz)합니다. 이 말은 매 1/44100초마다 한 번씩 소리의 크기를 측정한다는 뜻입니다.
-          </p>
+      <p>
+        <strong>표본화</strong>란? 아날로그 소리 파형을 일정한 시간 간격으로 나누어 소리의 강도를 측정해서 샘플을 추출하는 과정입니다. 이 때, 이 일정한 시간 간격에 따라 소리의 강도를 측정하는 것을 <strong>주기</strong>라고 합니다.<br>
+        주기의 횟수가 너무 적으면 원래 소리를 제대로 재현해내지 못하며, 주기의 횟수가 너무 많으면 정확한 소리를 측정할 수 있지만 용량이 너무 커집니다.<br>
+        예시 : CD 오디오는 1초에 44,100번 표본화(44.1kHz)합니다. 이 말은 매 1/44100초마다 한 번씩 소리의 크기를 측정한다는 뜻입니다.
+      </p>
       <div class="sampling-guide">  
         <p style="margin-top:1rem;color:#1976D2;font-weight:bold; text-align: center;">
           1. 슬라이더를 움직이면 표본화 주기(1~12)가 바뀌며, 그래프가 실시간으로 갱신됩니다.<br>
@@ -228,6 +231,16 @@
         <input type="range" id="samplingRateSlider" min="1" max="12" value="12" step="1">
       </div>
       <canvas id="samplingCanvas" width="900" height="320" style="width:100%;max-width:900px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
+    </section>
+
+    <section class="file-upload-section" style="margin-bottom:2rem;">
+      <h2>오디오 파일 업로드</h2>
+      <input type="file" id="audioFile" accept="audio/*,audio/mp3,.mp3,.wav,.ogg" />
+      <div class="upload-progress">
+        <div class="progress-bar"></div>
+        <span class="progress-text">0%</span>
+      </div>
+      <p class="file-info">지원 형식: WAV, MP3, OGG, M4A</p>
     </section>
     <section class="step">
       <h2>2단계: 양자화 (Quantization)</h2>
