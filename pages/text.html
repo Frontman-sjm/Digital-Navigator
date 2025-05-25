@@ -33,9 +33,19 @@
 
   <main>
     <section>
+      <h2>문자의 디지털 표현</h2>
+      <p>
+        컴퓨팅 시스템에서 각 문자를 이진수로 조합한 약속된 코드값인 <strong>문자 코드</strong>를 사용하여 저장하고 표현합니다.<br>
+        대표적인 문자 코드로는 <strong>아스키 코드(ASCII Code)</strong>와 <strong>유니 코드(Unicode)</strong>가 있습니다.<br>
+        <b>아스키 코드(ASCII Code)</b>는 7비트를 이용하여 문자를 표현합니다.<br>
+        <b>유니 코드(Unicode)</b>는 16비트를 이용하여 문자를 표현합니다.<br><br>
+        <h3 style="text-align: center;">아래에서 문자 코드에 대해 더 자세히 살펴봅시다.</h3>
+      </p>
+    </section>
+
+    <section>
       <h2>아스키 코드(ASCII Code)</h2>
       <p class="intro-text">
-        컴퓨팅 시스템 각 문자를 이진수로 조합한 약속된 코드값인 <strong>문자 코드</strong>를 사용하여 저장하고 표현합니다. 대표적인 문자 코드로는 <strong>아스키 코드(ASCII Code)</strong>와 <strong>유니 코드(Unicode)</strong>가 있습니다.<br>
         <strong>아스키 코드(ASCII Code)</strong>는 미국 표준화 협회에서 제작한 문자 코드로 알파벳, 숫자, 특수문자, 제어 문자(줄바꿈·탭·공백 등)을 표현할 수 있습니다.<br>
         또한, <strong>7비트</strong>를 사용하여 <strong>총 128개</strong>의 문자를 표현할 수 있습니다.<br>
         *맨 왼쪽에 패리티 비트(Parity bit)라고 하는 1비트를 추가하여 오류 여부를 판단합니다. 그래서 실질적으로는 8비트로 표현이 됩니다. 이 패리티 비트는 0으로 유지되며 만약, 1인 경우에는 오류가 있는 것으로 간주합니다.<br> 
@@ -94,15 +104,15 @@
     </section>
 
     <section>
-      <h2>이진코드 변환기</h2>
-      <p>이진코드를 입력하면 해당하는 문자를 확인할 수 있습니다.</p>
+      <h2>아스키 코드로 문자 작성해보기</h2>
+      <p>아스키 코드를 입력하면 해당하는 문자를 확인할 수 있습니다.</p>
       <div class="converter-box">
         <h3>이진코드 변환기</h3>
         <input type="text" id="binaryInput" placeholder="이진코드를 입력하세요 (예: 01001000 01101001)">
         <div class="input-guide">
           <strong>※ 주의사항</strong>
           <ul>
-            <li>각 문자는 8비트(패리티 비트+아스키 코드값)로 입력해주세요.</li>
+            <li>각 문자는 아스키 코드로 입력해주세요.</li>
             <li>문자 사이에 <strong>반드시 띄어쓰기</strong>를 해주세요.</li>
             <li>이진코드는 0과 1로만 구성되어야 합니다.</li>
             <li>잘못된 입력 시 오류 메시지가 표시됩니다.</li>
