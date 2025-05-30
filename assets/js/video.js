@@ -27,11 +27,73 @@ function resetPlayer() {
 function updateThumbnails() {
   frameThumbnails.innerHTML = '';
   frames.forEach((img, idx) => {
-    const thumb = document.createElement('img');
-    thumb.src = img.src;
-    thumb.title = `프레임 ${idx + 1}`;
+    const thumb = document.createElement('div');
+    thumb.className = 'frame-thumbnail';
+    thumb.draggable = true;
+    thumb.dataset.index = idx;
+    
+    thumb.innerHTML = `
+      <img src="${img.src}" alt="Frame ${idx + 1}" />
+      <span>${idx + 1}</span>
+    `;
+    
+    // 드래그 시작 이벤트
+    thumb.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', idx);
+      thumb.classList.add('dragging');
+    });
+    
+    // 드래그 종료 이벤트
+    thumb.addEventListener('dragend', () => {
+      thumb.classList.remove('dragging');
+    });
+    
+    // 드래그 오버 이벤트
+    thumb.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = frameThumbnails.querySelector('.dragging');
+      if (dragging !== thumb) {
+        const rect = thumb.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+          thumb.parentNode.insertBefore(dragging, thumb);
+        } else {
+          thumb.parentNode.insertBefore(dragging, thumb.nextSibling);
+        }
+        // 드래그 중에도 프레임 순서 업데이트
+        updateFrameOrder();
+      }
+    });
+    
     frameThumbnails.appendChild(thumb);
   });
+  
+  // 프레임 순서 업데이트
+  updateFrameOrder();
+}
+
+// 프레임 순서 업데이트
+function updateFrameOrder() {
+  const newFrames = [];
+  const thumbnails = frameThumbnails.querySelectorAll('.frame-thumbnail');
+  
+  thumbnails.forEach((thumb, idx) => {
+    const oldIndex = parseInt(thumb.dataset.index);
+    newFrames.push(frames[oldIndex]);
+    thumb.dataset.index = idx;
+    thumb.querySelector('span').textContent = idx + 1;
+  });
+  
+  frames = newFrames;
+  
+  // 현재 재생 중이었다면 재생 상태 유지
+  if (isPlaying) {
+    pauseAnimation();
+    playAnimation();
+  } else {
+    // 현재 프레임 다시 그리기
+    drawFrame(currentFrame);
+  }
 }
 
 // 프레임 그리기
@@ -185,15 +247,6 @@ frameFilesInput.addEventListener('change', async function(e) {
       reader.onload = function(e) {
         const img = new Image();
         img.onload = function() {
-          // 썸네일 생성
-          const thumbnail = document.createElement('div');
-          thumbnail.className = 'frame-thumbnail';
-          thumbnail.innerHTML = `
-            <img src="${e.target.result}" alt="Frame ${i + 1}" />
-            <span>${i + 1}</span>
-          `;
-          thumbnails.appendChild(thumbnail);
-          
           resolve(img);
         };
         img.src = e.target.result;
@@ -203,6 +256,9 @@ frameFilesInput.addEventListener('change', async function(e) {
     
     frames.push(imageData);
   }
+  
+  // 썸네일 업데이트
+  updateThumbnails();
   
   // 모든 프레임이 로드되면 저장 버튼 활성화
   if (frames.length > 0) {
