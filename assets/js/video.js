@@ -160,7 +160,7 @@ async function createAndSaveGIF() {
 // 이벤트 리스너 설정
 document.getElementById('saveBtn').addEventListener('click', createAndSaveGIF);
 
-frameFilesInput.addEventListener('change', function(e) {
+frameFilesInput.addEventListener('change', async function(e) {
   const files = Array.from(e.target.files).slice(0, MAX_FRAMES);
   frames = [];
   currentFrame = 0;
@@ -168,29 +168,46 @@ frameFilesInput.addEventListener('change', function(e) {
   const thumbnails = document.getElementById('frameThumbnails');
   thumbnails.innerHTML = '';
   
-  files.forEach((file, index) => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = new Image();
-      img.onload = function() {
-        frames.push(img);
-        
-        const thumbnail = document.createElement('div');
-        thumbnail.className = 'frame-thumbnail';
-        thumbnail.innerHTML = `
-          <img src="${e.target.result}" alt="Frame ${index + 1}" />
-          <span>${index + 1}</span>
-        `;
-        thumbnails.appendChild(thumbnail);
-        
-        if (frames.length === files.length) {
-          document.getElementById('saveBtn').disabled = false;
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  // 파일 이름으로 정렬
+  files.sort((a, b) => {
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+    return nameA.localeCompare(nameB, undefined, {numeric: true});
   });
+  
+  // 순차적으로 파일 처리
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    
+    // Promise로 FileReader 래핑
+    const imageData = await new Promise((resolve) => {
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // 썸네일 생성
+          const thumbnail = document.createElement('div');
+          thumbnail.className = 'frame-thumbnail';
+          thumbnail.innerHTML = `
+            <img src="${e.target.result}" alt="Frame ${i + 1}" />
+            <span>${i + 1}</span>
+          `;
+          thumbnails.appendChild(thumbnail);
+          
+          resolve(img);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    frames.push(imageData);
+  }
+  
+  // 모든 프레임이 로드되면 저장 버튼 활성화
+  if (frames.length > 0) {
+    document.getElementById('saveBtn').disabled = false;
+  }
 });
 
 playBtn.addEventListener('click', () => {
