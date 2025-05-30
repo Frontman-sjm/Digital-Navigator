@@ -50,6 +50,14 @@
       <div class="frame-canvas-container">
         <canvas id="frameCanvas" width="400" height="400" style="background:#f8f9fa;border-radius:12px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
       </div>
+      <div id="gifProgress" style="display:none; margin-top:1rem; text-align:center;">
+        <div style="margin-bottom:0.5rem;">
+          <span id="progressText">GIF 생성 중... 0%</span>
+        </div>
+        <div style="width:100%; height:20px; background:#f0f0f0; border-radius:10px; overflow:hidden;">
+          <div id="progressBar" style="width:0%; height:100%; background:#1976D2; transition:width 0.3s;"></div>
+        </div>
+      </div>
       <div class="input-guide" style="margin-top:1rem;">
         여러 장의 이미지를 업로드한 뒤, 재생 버튼을 눌러보세요!<br>
         프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.<br>

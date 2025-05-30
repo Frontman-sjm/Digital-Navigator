@@ -6,15 +6,15 @@ const pauseBtn = document.getElementById('pauseBtn');
 const frameSpeed = document.getElementById('frameSpeed');
 const frameSpeedValue = document.getElementById('frameSpeedValue');
 const frameCanvas = document.getElementById('frameCanvas');
-const ctx = frameCanvas.getContext('2d');
-const MAX_FRAMES = 50; // 최대 프레임 수를 50으로 증가
+const ctx = frameCanvas.getContext('2d', { willReadFrequently: true });
+const MAX_FRAMES = 50;
 
 let frames = [];
 let currentFrame = 0;
 let isPlaying = false;
 let animationId = null;
-let gif = null;
 
+// 플레이어 초기화
 function resetPlayer() {
   currentFrame = 0;
   isPlaying = false;
@@ -23,6 +23,7 @@ function resetPlayer() {
   pauseBtn.disabled = true;
 }
 
+// 썸네일 업데이트
 function updateThumbnails() {
   frameThumbnails.innerHTML = '';
   frames.forEach((img, idx) => {
@@ -33,10 +34,11 @@ function updateThumbnails() {
   });
 }
 
+// 프레임 그리기
 function drawFrame(idx) {
   ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
   if (!frames[idx]) return;
-  // 이미지 비율 유지하여 중앙에 그림
+  
   const img = frames[idx];
   const canvasW = frameCanvas.width;
   const canvasH = frameCanvas.height;
@@ -45,9 +47,11 @@ function drawFrame(idx) {
   const drawH = img.height * ratio;
   const dx = (canvasW - drawW) / 2;
   const dy = (canvasH - drawH) / 2;
+  
   ctx.drawImage(img, dx, dy, drawW, drawH);
 }
 
+// 애니메이션 재생
 function playAnimation() {
   if (frames.length === 0) return;
   isPlaying = true;
@@ -59,6 +63,7 @@ function playAnimation() {
   }, 1000 / parseInt(frameSpeed.value));
 }
 
+// 애니메이션 일시정지
 function pauseAnimation() {
   isPlaying = false;
   playBtn.disabled = false;
@@ -66,57 +71,106 @@ function pauseAnimation() {
   clearInterval(animationId);
 }
 
-// GIF 저장 기능 추가
-document.getElementById('saveBtn').addEventListener('click', async () => {
+// GIF 생성 및 저장
+async function createAndSaveGIF() {
   if (frames.length === 0) return;
   
   const saveBtn = document.getElementById('saveBtn');
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'GIF 생성 중...';
+  const progressDiv = document.getElementById('gifProgress');
+  const progressText = document.getElementById('progressText');
+  const progressBar = document.getElementById('progressBar');
   
   try {
-    const canvas = document.getElementById('frameCanvas');
-    const ctx = canvas.getContext('2d');
+    console.log('🎬 GIF 생성 시작');
+    console.log(`📊 설정: ${frames.length}개 프레임, ${frameSpeed.value}fps`);
     
-    // GIF 생성
-    gif = new GIF({
-      workers: 2,
-      quality: 10,
-      width: canvas.width,
-      height: canvas.height
-    });
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'GIF 생성 중...';
+    progressDiv.style.display = 'block';
+    progressText.textContent = 'GIF 생성 중... 0%';
+    progressBar.style.width = '0%';
     
-    // 각 프레임을 GIF에 추가
+    // 웹 워커 생성
+    const worker = new Worker('../assets/js/gif.worker.js');
+    
+    // 프레임 데이터 준비
+    const frameData = [];
     for (let i = 0; i < frames.length; i++) {
-      ctx.drawImage(frames[i], 0, 0, canvas.width, canvas.height);
-      gif.addFrame(ctx, {copy: true, delay: 1000 / document.getElementById('frameSpeed').value});
+      drawFrame(i);
+      const imageData = ctx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
+      frameData.push(imageData);
+      console.log(`🔄 프레임 ${i + 1}/${frames.length} 처리 완료`);
     }
     
-    // GIF 렌더링
-    gif.on('finished', function(blob) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'animation.gif';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'GIF 저장';
+    // 웹 워커에 데이터 전송
+    worker.postMessage({
+      frames: frameData,
+      width: frameCanvas.width,
+      height: frameCanvas.height,
+      fps: parseInt(frameSpeed.value),
+      quality: 10
     });
     
-    gif.render();
+    // 웹 워커로부터 메시지 수신
+    worker.onmessage = function(e) {
+      const { type, progress, blob } = e.data;
+      
+      if (type === 'progress') {
+        const percent = Math.round(progress * 100);
+        console.log(`🎨 렌더링 진행 중: ${percent}%`);
+        progressText.textContent = `GIF 렌더링 중... ${percent}%`;
+        progressBar.style.width = `${percent}%`;
+      }
+      else if (type === 'finished') {
+        console.log('✅ GIF 생성 완료');
+        console.log(`📦 파일 크기: ${(blob.size / 1024).toFixed(2)}KB`);
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'animation.gif';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'GIF 저장';
+        progressDiv.style.display = 'none';
+        
+        // 웹 워커 종료
+        worker.terminate();
+      }
+    };
+    
+    // 웹 워커 오류 처리
+    worker.onerror = function(error) {
+      console.error('❌ 웹 워커 오류:', error);
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'GIF 저장';
+      progressDiv.style.display = 'none';
+      worker.terminate();
+    };
+    
   } catch (error) {
-    console.error('GIF 생성 중 오류 발생:', error);
+    console.error('❌ GIF 생성 중 오류 발생:', error);
+    console.error('상세 오류 정보:', {
+      message: error.message,
+      stack: error.stack,
+      frames: frames.length,
+      canvasSize: `${frameCanvas.width}x${frameCanvas.height}`
+    });
+    
     saveBtn.disabled = false;
     saveBtn.textContent = 'GIF 저장';
+    progressDiv.style.display = 'none';
   }
-});
+}
 
-// 프레임 업로드 핸들러 수정
-document.getElementById('frameFiles').addEventListener('change', function(e) {
+// 이벤트 리스너 설정
+document.getElementById('saveBtn').addEventListener('click', createAndSaveGIF);
+
+frameFilesInput.addEventListener('change', function(e) {
   const files = Array.from(e.target.files).slice(0, MAX_FRAMES);
   frames = [];
   currentFrame = 0;
@@ -131,7 +185,6 @@ document.getElementById('frameFiles').addEventListener('change', function(e) {
       img.onload = function() {
         frames.push(img);
         
-        // 썸네일 생성
         const thumbnail = document.createElement('div');
         thumbnail.className = 'frame-thumbnail';
         thumbnail.innerHTML = `
@@ -140,7 +193,6 @@ document.getElementById('frameFiles').addEventListener('change', function(e) {
         `;
         thumbnails.appendChild(thumbnail);
         
-        // 모든 프레임이 로드되면 저장 버튼 활성화
         if (frames.length === files.length) {
           document.getElementById('saveBtn').disabled = false;
         }
@@ -157,9 +209,11 @@ playBtn.addEventListener('click', () => {
     playAnimation();
   }
 });
+
 pauseBtn.addEventListener('click', () => {
   pauseAnimation();
 });
+
 frameSpeed.addEventListener('input', () => {
   frameSpeedValue.textContent = frameSpeed.value;
   if (isPlaying) {
@@ -168,5 +222,5 @@ frameSpeed.addEventListener('input', () => {
   }
 });
 
-// 최초 진입 시 초기화
+// 초기화
 resetPlayer(); 
