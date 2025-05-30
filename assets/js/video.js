@@ -91,11 +91,12 @@ async function createAndSaveGIF() {
     progressBar.style.width = '0%';
     
     const gif = new GIF({
-      workers: 2,
+      workers: 0, // 웹 워커 사용 안 함
       quality: 10,
       width: frameCanvas.width,
       height: frameCanvas.height,
-      dither: false
+      dither: false,
+      workerScript: null // 웹 워커 스크립트 비활성화
     });
     
     // 진행 상황 업데이트 함수
