@@ -90,67 +90,64 @@ async function createAndSaveGIF() {
     progressText.textContent = 'GIF 생성 중... 0%';
     progressBar.style.width = '0%';
     
-    // 웹 워커 생성
-    const worker = new Worker('../assets/js/gif.worker.js');
-    
-    // 프레임 데이터 준비
-    const frameData = [];
-    for (let i = 0; i < frames.length; i++) {
-      drawFrame(i);
-      const imageData = ctx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-      frameData.push(imageData);
-      console.log(`🔄 프레임 ${i + 1}/${frames.length} 처리 완료`);
-    }
-    
-    // 웹 워커에 데이터 전송
-    worker.postMessage({
-      frames: frameData,
+    const gif = new GIF({
+      workers: 2,
+      quality: 10,
       width: frameCanvas.width,
       height: frameCanvas.height,
-      fps: parseInt(frameSpeed.value),
-      quality: 10
+      dither: false
     });
     
-    // 웹 워커로부터 메시지 수신
-    worker.onmessage = function(e) {
-      const { type, progress, blob } = e.data;
-      
-      if (type === 'progress') {
-        const percent = Math.round(progress * 100);
-        console.log(`🎨 렌더링 진행 중: ${percent}%`);
-        progressText.textContent = `GIF 렌더링 중... ${percent}%`;
-        progressBar.style.width = `${percent}%`;
-      }
-      else if (type === 'finished') {
-        console.log('✅ GIF 생성 완료');
-        console.log(`📦 파일 크기: ${(blob.size / 1024).toFixed(2)}KB`);
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'animation.gif';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'GIF 저장';
-        progressDiv.style.display = 'none';
-        
-        // 웹 워커 종료
-        worker.terminate();
-      }
+    // 진행 상황 업데이트 함수
+    const updateProgress = (progress, stage) => {
+      const percent = Math.round(progress * 100);
+      console.log(`🔄 ${stage}: ${percent}% 완료`);
+      progressText.textContent = `GIF 생성 중... ${percent}%`;
+      progressBar.style.width = `${percent}%`;
     };
     
-    // 웹 워커 오류 처리
-    worker.onerror = function(error) {
-      console.error('❌ 웹 워커 오류:', error);
+    console.log('📝 프레임 추가 시작');
+    // 프레임 추가
+    for (let i = 0; i < frames.length; i++) {
+      drawFrame(i);
+      gif.addFrame(ctx, {
+        copy: true,
+        delay: 1000 / parseInt(frameSpeed.value)
+      });
+      updateProgress((i + 1) / frames.length, `프레임 ${i + 1}/${frames.length} 처리`);
+    }
+    
+    // GIF 생성 완료 이벤트
+    gif.on('finished', (blob) => {
+      console.log('✅ GIF 생성 완료');
+      console.log(`📦 파일 크기: ${(blob.size / 1024).toFixed(2)}KB`);
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'animation.gif';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
       saveBtn.disabled = false;
       saveBtn.textContent = 'GIF 저장';
       progressDiv.style.display = 'none';
-      worker.terminate();
-    };
+    });
+    
+    // 렌더링 진행 상황 이벤트
+    gif.on('progress', (p) => {
+      const percent = Math.round(p * 100);
+      console.log(`🎨 렌더링 진행 중: ${percent}%`);
+      progressText.textContent = `GIF 렌더링 중... ${percent}%`;
+      progressBar.style.width = `${percent}%`;
+    });
+    
+    // GIF 렌더링 시작
+    console.log('🎨 GIF 렌더링 시작');
+    progressText.textContent = 'GIF 렌더링 중...';
+    gif.render();
     
   } catch (error) {
     console.error('❌ GIF 생성 중 오류 발생:', error);
