@@ -66,7 +66,7 @@ function pauseAnimation() {
   clearInterval(animationId);
 }
 
-// GIF 저장 기능 추가
+// GIF 저장 기능 수정
 document.getElementById('saveBtn').addEventListener('click', async () => {
   if (frames.length === 0) return;
   
@@ -83,13 +83,31 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
       workers: 2,
       quality: 10,
       width: canvas.width,
-      height: canvas.height
+      height: canvas.height,
+      dither: false
     });
     
     // 각 프레임을 GIF에 추가
     for (let i = 0; i < frames.length; i++) {
-      ctx.drawImage(frames[i], 0, 0, canvas.width, canvas.height);
-      gif.addFrame(ctx, {copy: true, delay: 1000 / document.getElementById('frameSpeed').value});
+      const img = frames[i];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 이미지 비율 유지하여 중앙에 그림
+      const canvasW = canvas.width;
+      const canvasH = canvas.height;
+      const ratio = Math.min(canvasW / img.width, canvasH / img.height);
+      const drawW = img.width * ratio;
+      const drawH = img.height * ratio;
+      const dx = (canvasW - drawW) / 2;
+      const dy = (canvasH - drawH) / 2;
+      
+      ctx.drawImage(img, dx, dy, drawW, drawH);
+      
+      // 프레임 추가
+      gif.addFrame(ctx, {
+        copy: true,
+        delay: 1000 / parseInt(frameSpeed.value)
+      });
     }
     
     // GIF 렌더링
