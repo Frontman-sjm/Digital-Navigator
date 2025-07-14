@@ -3087,19 +3087,53 @@ canvas {
 }
 .frame-thumbnails {
   display: flex;
-  gap: 0.7rem;
-  margin: 1rem 0;
   flex-wrap: wrap;
-}
-.frame-thumbnails img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
+  gap: 10px;
+  padding: 10px;
+  min-height: 100px;
+  background: #f8f9fa;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
-  box-shadow: 0 2px 8px rgba(52,152,219,0.08);
-  background: #fff;
+  margin: 10px 0;
 }
+
+.frame-thumbnail {
+  display: inline-block;
+  margin: 5px;
+  position: relative;
+  cursor: move;
+  transition: transform 0.2s;
+}
+
+.frame-thumbnail img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 2px solid #ddd;
+}
+
+.frame-thumbnail span {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #1976D2;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.frame-thumbnail.dragging {
+  opacity: 0.5;
+  transform: scale(1.1);
+  z-index: 1000;
+}
+
 .frame-player-controls {
   display: flex;
   align-items: center;
