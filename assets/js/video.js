@@ -245,14 +245,14 @@ frameFilesInput.addEventListener('change', async function(e) {
     // Promise로 FileReader 래핑
     const imageData = await new Promise((resolve) => {
       reader.onload = function(e) {
-        const img = new Image();
+      const img = new Image();
         img.onload = function() {
           resolve(img);
-        };
-        img.src = e.target.result;
       };
-      reader.readAsDataURL(file);
-    });
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
     
     frames.push(imageData);
   }
