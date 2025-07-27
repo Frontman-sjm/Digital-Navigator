@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>동영상의 디지털 표현</title>
   <link rel="stylesheet" href="../assets/css/styles.css" />
+  <!-- Swiper.js CDN 추가 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
 </head>
 <body>
   <header>
@@ -22,50 +25,80 @@
     </nav>
   </header>
   <main>
-    <section>
-      <h2>동영상의 디지털 표현</h2>
-      <p>
-        동영상은 이미지, 소리, 문자 등이 조합된 다중 매체 정보입니다.<br>
-        컴퓨팅 시스템에서 동영상을 표현하는 방식은 <b>프레임(Frame)</b>이라고 하는 정지된 이미지를 빠르게 나열하여 표현합니다.<br>
-        이 때, 1초 당 몇 장의 프레임(사진)을 보여주는지의 정도를 <b>프레임 속도(FPS, Frame per Second)</b>라고 합니다.<br>
-        60FPS는 1초 당 60장의 프레임을 보여주며, 30FPS는 1초 당 30장의 프레임을 보여줍니다.<br>
-        1초 당 많은 프레임을 보여줄수록 더욱 좋은 화질을 가진 선명한 동영상을 보여줄 수 있지만, 용량이 커집니다.<br><br>
-        <h3 style="text-align: center;">아래 활동을 통해 간단한 동영상을 제작해봅시다.</h3>
-      </p>
-    </section>
-    <section>
-      <h2>프레임 애니메이션 체험</h2>
-      <div class="video-frame-controls">
-        <label for="frameFiles"><strong>프레임 이미지 업로드 (최대 50장):</strong></label>
-        <input type="file" id="frameFiles" accept="image/*" multiple />
-        <div class="frame-thumbnails" id="frameThumbnails"></div>
-        <div class="frame-player-controls">
-          <button id="playBtn">재생</button>
-          <button id="pauseBtn" disabled>일시정지</button>
-          <button id="saveBtn" disabled>GIF 저장</button>
-          <label for="frameSpeed">프레임 속도: <span id="frameSpeedValue">30</span> fps</label>
-          <input type="range" id="frameSpeed" min="1" max="60" value="30" />
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <section>
+            <h2>동영상의 디지털 표현</h2>
+            <p>
+              동영상은 이미지, 소리, 문자 등이 조합된 다중 매체 정보입니다.<br>
+              컴퓨팅 시스템에서 동영상을 표현하는 방식은 <b>프레임(Frame)</b>이라고 하는 정지된 이미지를 빠르게 나열하여 표현합니다.<br>
+              이 때, 1초 당 몇 장의 프레임(사진)을 보여주는지의 정도를 <b>프레임 속도(FPS, Frame per Second)</b>라고 합니다.<br>
+              60FPS는 1초 당 60장의 프레임을 보여주며, 30FPS는 1초 당 30장의 프레임을 보여줍니다.<br>
+              1초 당 많은 프레임을 보여줄수록 더욱 좋은 화질을 가진 선명한 동영상을 보여줄 수 있지만, 용량이 커집니다.<br><br>
+              <h3 style="text-align: center;">아래 활동을 통해 간단한 동영상을 제작해봅시다.</h3>
+            </p>
+          </section>
+        </div>
+        <div class="swiper-slide">
+          <section>
+            <h2>프레임 애니메이션 체험</h2>
+            <div class="video-frame-controls">
+              <label for="frameFiles"><strong>프레임 이미지 업로드 (최대 50장):</strong></label>
+              <input type="file" id="frameFiles" accept="image/*" multiple />
+              <div class="frame-thumbnails" id="frameThumbnails"></div>
+              <div class="frame-player-controls">
+                <button id="playBtn">재생</button>
+                <button id="pauseBtn" disabled>일시정지</button>
+                <button id="saveBtn" disabled>GIF 저장</button>
+                <label for="frameSpeed">프레임 속도: <span id="frameSpeedValue">30</span> fps</label>
+                <input type="range" id="frameSpeed" min="1" max="60" value="30" />
+              </div>
+            </div>
+            <div class="frame-canvas-container">
+              <canvas id="frameCanvas" width="400" height="400" style="background:#f8f9fa;border-radius:12px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
+            </div>
+            <div id="gifProgress" style="display:none; margin-top:1rem; text-align:center;">
+              <div style="margin-bottom:0.5rem;">
+                <span id="progressText">GIF 생성 중... 0%</span>
+              </div>
+              <div style="width:100%; height:20px; background:#f0f0f0; border-radius:10px; overflow:hidden;">
+                <div id="progressBar" style="width:0%; height:100%; background:#1976D2; transition:width 0.3s;"></div>
+              </div>
+            </div>
+            <div class="input-guide" style="margin-top:1rem;">
+              여러 장의 이미지를 업로드한 뒤, 재생 버튼을 눌러보세요!<br>
+              프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.<br>
+              GIF 저장 버튼을 눌러 애니메이션을 저장할 수 있습니다.
+            </div>
+          </section>
         </div>
       </div>
-      <div class="frame-canvas-container">
-        <canvas id="frameCanvas" width="400" height="400" style="background:#f8f9fa;border-radius:12px;box-shadow:0 4px 20px rgba(52,152,219,0.08);"></canvas>
-      </div>
-      <div id="gifProgress" style="display:none; margin-top:1rem; text-align:center;">
-        <div style="margin-bottom:0.5rem;">
-          <span id="progressText">GIF 생성 중... 0%</span>
-        </div>
-        <div style="width:100%; height:20px; background:#f0f0f0; border-radius:10px; overflow:hidden;">
-          <div id="progressBar" style="width:0%; height:100%; background:#1976D2; transition:width 0.3s;"></div>
-        </div>
-      </div>
-      <div class="input-guide" style="margin-top:1rem;">
-        여러 장의 이미지를 업로드한 뒤, 재생 버튼을 눌러보세요!<br>
-        프레임 속도를 조절하면 영상이 더 부드럽거나 끊겨 보일 수 있습니다.<br>
-        GIF 저장 버튼을 눌러 애니메이션을 저장할 수 있습니다.
-      </div>
-    </section>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
   <script src="../assets/js/video.js"></script>
+  <script>
+    window.onload = function () {
+      if (typeof Swiper !== 'undefined') {
+        new Swiper('.swiper-container', {
+          direction: 'horizontal',
+          loop: false,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+          simulateTouch: true,
+        });
+      }
+    };
+  </script>
 </body>
 </html> 

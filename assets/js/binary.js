@@ -50,6 +50,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 기본 난이도 버튼 활성화
   difficultyButtons[0].classList.add('active');
+
+  // Swiper.js 초기화 코드 예시
+  // Swiper 라이브러리가 로드되어 있다고 가정
+
+  if (typeof Swiper !== 'undefined') {
+    new Swiper('.swiper-container', {
+      direction: 'horizontal',
+      loop: false,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      // 모바일 스와이프 지원
+      simulateTouch: true,
+    });
+  }
 });
 
 // 모달 열기
@@ -132,5 +152,25 @@ window.onclick = function (event) {
 
 // 페이지 로드 시 퀴즈 생성
 window.onload = function () {
+  // 기존 퀴즈 생성
   generateQuiz();
+
+  // Swiper 인스턴스 생성
+  if (typeof Swiper !== 'undefined') {
+    new Swiper('.swiper-container', {
+      direction: 'horizontal',
+      loop: false,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      simulateTouch: true,
+    });
+  } else {
+    console.warn('Swiper 라이브러리가 로드되지 않았습니다.');
+  }
 }; 

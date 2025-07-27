@@ -109,9 +109,9 @@ nav ul li a:hover::before {
 
 /* Main content styling */
 main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 main section {
@@ -1291,14 +1291,28 @@ canvas {
   width: 200px;
 }
 
-.step {
-  margin: 2rem 0;
-  padding: 2rem;
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+.step, .file-upload-section, .audio-controls, .sampling-guide {
+  background: #fff;
   border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
+  margin-top: 2.5rem;
+  max-width: 900px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 768px) {
+  .step, .file-upload-section, .audio-controls, .sampling-guide {
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    margin-top: 1.2rem;
+    border-radius: 12px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .step::before {
@@ -3456,4 +3470,122 @@ canvas {
   .secondary-button {
     width: 100%;
   }
+}
+
+/* Swiper 슬라이드 가시성 및 겹침 문제 해결 */
+.swiper-container {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+  background: transparent;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.swiper-wrapper {
+  display: flex;
+  /* width: auto; Swiper가 자동으로 관리하므로 명시적으로 지정하지 않음 */
+}
+.swiper-slide {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(52,152,219,0.08);
+  padding: 2rem;
+  min-height: 350px;
+  transition: opacity 0.3s, visibility 0.3s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.swiper-slide-active,
+.swiper-slide-next,
+.swiper-slide-prev {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+.swiper-slide:not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  pointer-events: none;
+}
+.swiper-button-next,
+.swiper-button-prev {
+  color: #1976D2;
+  z-index: 10000;
+  position: fixed !important;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  transition: background 0.2s;
+}
+.swiper-button-prev {
+  left: 24px;
+}
+.swiper-button-next {
+  right: 24px;
+}
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: #e3f0fa;
+}
+@media (max-width: 600px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    width: 38px;
+    height: 38px;
+    font-size: 1.5rem;
+  }
+  .swiper-button-prev {
+    left: 6px;
+  }
+  .swiper-button-next {
+    right: 6px;
+  }
+}
+.swiper-pagination-bullet {
+  background: #1976D2;
+  opacity: 0.5;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1;
+}
+@media (max-width: 600px) {
+  .swiper-slide {
+    padding: 1rem;
+    min-height: 250px;
+  }
+  .swiper-container {
+    padding: 1rem 0;
+  }
+}
+
+/* 슬라이드 내부 section/main 스타일 겹침 방지 */
+.swiper-slide section {
+  background: none !important;
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
