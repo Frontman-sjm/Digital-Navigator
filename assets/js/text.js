@@ -582,7 +582,9 @@ class BingoGame {
 }
 
 // 페이지 로드 시 게임 초기화
-window.onload = function () {
-  const game = new BingoGame();
-  game.initialize();
-}; 
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function() {
+    const game = new BingoGame();
+    game.initialize();
+  }, 300); // Swiper 슬라이드 렌더링 이후 DOM이 완전히 준비된 뒤 초기화
+}); 
